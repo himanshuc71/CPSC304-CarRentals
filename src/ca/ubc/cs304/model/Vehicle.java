@@ -3,20 +3,18 @@ package ca.ubc.cs304.model;
 import java.util.Objects;
 
 public class Vehicle {
-    private final int vid;
     private final String vLicence;
     private final String make;
     private final String model;
     private final String year;
     private final String color;
     private final int odometer;
-    private String status;  // available or not_available
+    private String status;  // available or maintenance or rented
     private final VehicleType vtname;
     private final BranchModel branch;
 
-    public Vehicle(int vid, String vLicence, String make, String model, String year, String color, int odometer,
+    public Vehicle(String vLicence, String make, String model, String year, String color, int odometer,
                    String status, VehicleType vtname, BranchModel branch) {
-        this.vid = vid;
         this.vLicence = vLicence;
         this.make = make;
         this.model = model;
@@ -26,10 +24,6 @@ public class Vehicle {
         this.status = status;
         this.vtname = vtname;
         this.branch = branch;
-    }
-
-    public int getVid() {
-        return vid;
     }
 
     public String getvLicence() {
@@ -81,11 +75,11 @@ public class Vehicle {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vehicle vehicle = (Vehicle) o;
-        return vid == vehicle.vid;
+        return vLicence.equals(vehicle.vLicence);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vid);
+        return Objects.hash(vLicence);
     }
 }

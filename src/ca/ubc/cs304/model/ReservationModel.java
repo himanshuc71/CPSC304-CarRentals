@@ -5,15 +5,15 @@ import java.util.Objects;
 public class ReservationModel {
     private final int confNo;
     private final VehicleType vtname;
-    private final CustomerModel cellphone;
+    private final CustomerModel dLicense;
     private final String fromDateTime;
     private final String toDateTime;
 
-    public ReservationModel(int confNo, VehicleType vtname, CustomerModel cellphone, String fromDateTime,
+    public ReservationModel(int confNo, VehicleType vtname, CustomerModel dLicense, String fromDateTime,
                             String toDateTime){
         this.confNo = confNo;
         this.vtname = vtname;
-        this.cellphone = cellphone;
+        this.dLicense = dLicense;
         this.fromDateTime = fromDateTime;
         this.toDateTime = toDateTime;
     }
@@ -27,7 +27,7 @@ public class ReservationModel {
     }
 
     public CustomerModel getCellphone() {
-        return cellphone;
+        return dLicense;
     }
 
     public String getFromDateTime() {

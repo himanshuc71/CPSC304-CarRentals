@@ -36,12 +36,12 @@ public class CustomerModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CustomerModel that = (CustomerModel) o;
-        return cellphone == that.cellphone;
+        return dLicense == that.dLicense;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cellphone);
+        return Objects.hash(dLicense);
     }
 
     @Override

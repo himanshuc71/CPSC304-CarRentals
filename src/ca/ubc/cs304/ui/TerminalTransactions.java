@@ -41,7 +41,7 @@ public class TerminalTransactions {
 			System.out.println("1. If you are a Customer");
 			System.out.println("2. If you are a Clerk");
 			System.out.println("3. Quit");
-			System.out.print("Please choose one of the above 5 options: ");
+			System.out.print("Please choose one of the above 3 options: ");
 
 			choice = readInteger(false);
 
