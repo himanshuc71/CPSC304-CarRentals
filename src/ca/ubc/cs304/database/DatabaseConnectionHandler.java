@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import ca.ubc.cs304.model.BranchModel;
+import ca.ubc.cs304.model.CustomerModel;
 
 /**
  * This class handles all database related transactions
@@ -117,6 +118,24 @@ public class DatabaseConnectionHandler {
 		
 		return result.toArray(new BranchModel[result.size()]);
 	}
+
+	public void insertCustomer (CustomerModel customer) {
+	    try {
+	        PreparedStatement ps = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
+	        ps.setInt(1, customer.getCellphone());
+            ps.setString(2, customer.getCname());
+            ps.setString(3, customer.getAddress());
+            ps.setInt(4, customer.getdLicense());
+
+            ps.executeUpdate();
+            connection.commit();
+
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
 	
 	public void updateBranch(int id, String name) {
 		try {

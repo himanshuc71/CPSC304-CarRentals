@@ -155,21 +155,21 @@ public class TerminalTransactions {
 		delegate.terminalTransactionsFinished();
 	}
 	
-	private void handleUpdateOption() {
-		int id = INVALID_INPUT;
-		while (id == INVALID_INPUT) {
-			System.out.print("Please enter the branch ID you wish to update: ");
-			id = readInteger(false);
-		}
-		
-		String name = null;
-		while (name == null || name.length() <= 0) {
-			System.out.print("Please enter the branch name you wish to update: ");
-			name = readLine().trim();
-		}
-
-		delegate.updateBranch(id, name);
-	}
+//	private void handleUpdateOption() {
+//		int id = INVALID_INPUT;
+//		while (id == INVALID_INPUT) {
+//			System.out.print("Please enter the branch ID you wish to update: ");
+//			id = readInteger(false);
+//		}
+//
+//		String name = null;
+//		while (name == null || name.length() <= 0) {
+//			System.out.print("Please enter the branch name you wish to update: ");
+//			name = readLine().trim();
+//		}
+//
+//		delegate.updateBranch(id, name);
+//	}
 	
 	private int readInteger(boolean allowEmpty) {
 		String line = null;

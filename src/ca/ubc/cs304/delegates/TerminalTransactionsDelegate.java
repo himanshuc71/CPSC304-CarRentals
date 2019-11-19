@@ -1,6 +1,7 @@
 package ca.ubc.cs304.delegates;
 
 import ca.ubc.cs304.model.BranchModel;
+import ca.ubc.cs304.model.CustomerModel;
 
 /**
  * This interface uses the delegation design pattern where instead of having
@@ -12,10 +13,13 @@ import ca.ubc.cs304.model.BranchModel;
  * Bank is the actual class that will implement the methods.
  */
 public interface TerminalTransactionsDelegate {
-	public void deleteBranch(int branchId);
-	public void insertBranch(BranchModel model);
-	public void showBranch();
-	public void updateBranch(int branchId, String name);
+//	public void deleteBranch(int branchId);
+//	public void insertBranch(BranchModel model);
+//	public void showBranch();
+//	public void updateBranch(int branchId, String name);
+
+	// rental car methods..
+	public void insertCustomer(CustomerModel customer);
 	
 	public void terminalTransactionsFinished();
 }
