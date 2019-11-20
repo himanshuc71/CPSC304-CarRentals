@@ -1,16 +1,17 @@
 package ca.ubc.cs304.model;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class ReservationModel {
     private final int confNo;
     private final VehicleType vtname;
     private final CustomerModel dLicense;
-    private final String fromDateTime;
-    private final String toDateTime;
+    private final Timestamp fromDateTime;
+    private final Timestamp toDateTime;
 
-    public ReservationModel(int confNo, VehicleType vtname, CustomerModel dLicense, String fromDateTime,
-                            String toDateTime){
+    public ReservationModel(int confNo, VehicleType vtname, CustomerModel dLicense, Timestamp fromDateTime,
+                            Timestamp toDateTime){
         this.confNo = confNo;
         this.vtname = vtname;
         this.dLicense = dLicense;
@@ -30,11 +31,11 @@ public class ReservationModel {
         return dLicense;
     }
 
-    public String getFromDateTime() {
+    public Timestamp getFromDateTime() {
         return fromDateTime;
     }
 
-    public String getToDateTime() {
+    public Timestamp getToDateTime() {
         return toDateTime;
     }
 

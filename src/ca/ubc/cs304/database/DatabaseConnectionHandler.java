@@ -137,25 +137,25 @@ public class DatabaseConnectionHandler {
         }
     }
 	
-	public void updateBranch(int id, String name) {
-		try {
-		  PreparedStatement ps = connection.prepareStatement("UPDATE branch SET branch_name = ? WHERE branch_id = ?");
-		  ps.setString(1, name);
-		  ps.setInt(2, id);
-		
-		  int rowCount = ps.executeUpdate();
-		  if (rowCount == 0) {
-		      System.out.println(WARNING_TAG + " Branch " + id + " does not exist!");
-		  }
-	
-		  connection.commit();
-		  
-		  ps.close();
-		} catch (SQLException e) {
-			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
-			rollbackConnection();
-		}	
-	}
+//	public void updateBranch(int id, String name) {
+//		try {
+//		  PreparedStatement ps = connection.prepareStatement("UPDATE branch SET branch_name = ? WHERE branch_id = ?");
+//		  ps.setString(1, name);
+//		  ps.setInt(2, id);
+//
+//		  int rowCount = ps.executeUpdate();
+//		  if (rowCount == 0) {
+//		      System.out.println(WARNING_TAG + " Branch " + id + " does not exist!");
+//		  }
+//
+//		  connection.commit();
+//
+//		  ps.close();
+//		} catch (SQLException e) {
+//			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+//			rollbackConnection();
+//		}
+//	}
 	
 	public boolean login(String username, String password) {
 		try {

@@ -1,5 +1,6 @@
 package ca.ubc.cs304.model;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class RentalModel {
@@ -11,8 +12,8 @@ public class RentalModel {
     private final int cardNo;
     private final String expDate;
     private final ReservationModel confNo;
-    private final String fromDateTime;
-    private final String toDateTime;
+    private final Timestamp fromDateTime;
+    private final Timestamp toDateTime;
 
     public RentalModel(int rid, Vehicle vLicense, CustomerModel cellPhone, int odometer, String cardName,
             int cardNo, String expDate, ReservationModel confNo) {
@@ -60,11 +61,11 @@ public class RentalModel {
         return confNo;
     }
 
-    public String getFromDateTime() {
+    public Timestamp getFromDateTime() {
         return fromDateTime;
     }
 
-    public String getToDateTime() {
+    public Timestamp getToDateTime() {
         return toDateTime;
     }
 

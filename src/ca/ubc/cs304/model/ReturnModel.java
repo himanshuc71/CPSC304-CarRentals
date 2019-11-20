@@ -1,13 +1,15 @@
 package ca.ubc.cs304.model;
 
+import java.sql.Timestamp;
+
 public class ReturnModel {
     private final RentalModel rid;
-    private final String rtnDateTime;
+    private final Timestamp rtnDateTime;
     private final int odometer;
     private final int fullTank;   // 0 empty; 1 full
     private int value;
 
-    public ReturnModel(RentalModel rid, String rtnDateTime, int odometer, int fullTank) {
+    public ReturnModel(RentalModel rid, Timestamp rtnDateTime, int odometer, int fullTank) {
         this.rid = rid;
         this.rtnDateTime = rtnDateTime;
         this.odometer = odometer;
@@ -22,7 +24,7 @@ public class ReturnModel {
         return rid;
     }
 
-    public String getRtnDateTime() {
+    public Timestamp getRtnDateTime() {
         return rtnDateTime;
     }
 
