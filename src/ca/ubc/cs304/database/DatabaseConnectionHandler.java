@@ -1,15 +1,11 @@
 package ca.ubc.cs304.database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
+import ca.ubc.cs304.model.ReservationModel;
 
 /**
  * This class handles all database related transactions
@@ -131,6 +127,24 @@ public class DatabaseConnectionHandler {
             connection.commit();
 
             ps.close();
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    public void insertRental (int confNo) {
+	    try {
+	        Statement s = connection.createStatement();
+	        ResultSet rs = s.executeQuery("SELECT * FROM RESERVATION WHERE CONFNO = " + confNo);
+	        //get info on ResultSet
+    		ResultSetMetaData rsmd = rs.getMetaData();
+			ReservationModel reservation;
+    		while (rs.next()) {
+    			reservation = new ReservationModel(rs.getInt("confNo"), rs.getString("vtname"),
+						rs.getInt("dLicense"), rs.getTimestamp("fromDateTime"),
+						rs.getTimestamp("toDateTime"));
+			}
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();

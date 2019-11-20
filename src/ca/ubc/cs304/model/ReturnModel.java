@@ -3,24 +3,21 @@ package ca.ubc.cs304.model;
 import java.sql.Timestamp;
 
 public class ReturnModel {
-    private final RentalModel rid;
+    private final int rid;
     private final Timestamp rtnDateTime;
     private final int odometer;
     private final int fullTank;   // 0 empty; 1 full
-    private int value;
+    private final int value;
 
-    public ReturnModel(RentalModel rid, Timestamp rtnDateTime, int odometer, int fullTank) {
+    public ReturnModel(int rid, Timestamp rtnDateTime, int odometer, int fullTank, int value) {
         this.rid = rid;
         this.rtnDateTime = rtnDateTime;
         this.odometer = odometer;
         this.fullTank = fullTank;
-    }
-    // calc price of the rental based on the vt prices mentioned
-    private void setValue(){
-        this.value = rid.getVid().getVtname().getwRate();
+        this.value = value;
     }
 
-    public RentalModel getRid() {
+    public int getRid() {
         return rid;
     }
 

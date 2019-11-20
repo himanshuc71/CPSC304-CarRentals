@@ -20,6 +20,7 @@ public interface TerminalTransactionsDelegate {
 
 	// rental car methods..
 	public void insertCustomer(CustomerModel customer);
+	public void insertRental(int confNo);
 	
 	public void terminalTransactionsFinished();
 }

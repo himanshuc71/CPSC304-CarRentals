@@ -10,11 +10,12 @@ public class Vehicle {
     private final String color;
     private final int odometer;
     private String status;  // available or maintenance or rented
-    private final VehicleType vtname;
-    private final BranchModel branch;
+    private final String vtname;
+    private final String location;
+    private final String city;
 
     public Vehicle(String vLicence, String make, String model, String year, String color, int odometer,
-                   String status, VehicleType vtname, BranchModel branch) {
+                   String status, String vtname, String location, String city) {
         this.vLicence = vLicence;
         this.make = make;
         this.model = model;
@@ -23,7 +24,8 @@ public class Vehicle {
         this.odometer = odometer;
         this.status = status;
         this.vtname = vtname;
-        this.branch = branch;
+        this.location = location;
+        this.city = city;
     }
 
     public String getvLicence() {
@@ -54,16 +56,16 @@ public class Vehicle {
         return status;
     }
 
-    public VehicleType getVtname() {
+    public String getVtname() {
         return vtname;
     }
 
     public String getLocation() {
-        return this.branch.getLocation();
+        return this.location;
     }
 
     public String getCity() {
-        return this.branch.getCity();
+        return this.city;
     }
 
     public void setStatus(String status) {

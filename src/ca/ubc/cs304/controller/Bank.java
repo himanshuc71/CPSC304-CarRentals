@@ -57,6 +57,10 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public void insertCustomer(CustomerModel customer) {
 		dbHandler.insertCustomer(customer);
 	}
+
+	public void insertRental (int confNo) {
+	    dbHandler.insertRental(confNo);
+    }
 	
 //	/**
 //	 * TermainalTransactionsDelegate Implementation

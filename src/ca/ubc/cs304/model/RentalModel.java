@@ -5,18 +5,18 @@ import java.util.Objects;
 
 public class RentalModel {
     private final int rid;
-    private final Vehicle vLicense;
-    private final CustomerModel cellPhone;
+    private final String vLicense;
+    private final int cellPhone;
     private final int odometer;
     private final String cardName;
     private final int cardNo;
     private final String expDate;
-    private final ReservationModel confNo;
+    private final int confNo;
     private final Timestamp fromDateTime;
     private final Timestamp toDateTime;
 
-    public RentalModel(int rid, Vehicle vLicense, CustomerModel cellPhone, int odometer, String cardName,
-            int cardNo, String expDate, ReservationModel confNo) {
+    public RentalModel(int rid, String vLicense, int cellPhone, int odometer, String cardName,
+            int cardNo, String expDate, int confNo, Timestamp fromDateTime, Timestamp toDateTime) {
         this.rid = rid;
         this.vLicense = vLicense;
         this.cellPhone = cellPhone;
@@ -25,19 +25,19 @@ public class RentalModel {
         this.cardNo = cardNo;
         this.expDate = expDate;
         this.confNo = confNo;
-        this.fromDateTime = confNo.getFromDateTime();
-        this.toDateTime = confNo.getToDateTime();
+        this.fromDateTime = fromDateTime;
+        this.toDateTime = toDateTime;
     }
 
     public int getRid() {
         return rid;
     }
 
-    public Vehicle getVid() {
+    public String getVid() {
         return vLicense;
     }
 
-    public CustomerModel getCellPhone() {
+    public int getCellPhone() {
         return cellPhone;
     }
 
@@ -57,7 +57,7 @@ public class RentalModel {
         return expDate;
     }
 
-    public ReservationModel getConfNo() {
+    public int getConfNo() {
         return confNo;
     }
 
