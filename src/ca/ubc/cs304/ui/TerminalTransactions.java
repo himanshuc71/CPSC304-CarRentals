@@ -76,70 +76,73 @@ public class TerminalTransactions {
 	}
 
 	private void handleCustomer(){
-	    int cellphone = INVALID_INPUT;
-	    while (cellphone == INVALID_INPUT) {
-            System.out.print("Please enter your cellphone: ");
-            cellphone = readInteger(false);
-            //check if customer exists in database if not make a new customer
-
+	    int dLicense = INVALID_INPUT;
+	    while (dLicense == INVALID_INPUT) {
+            System.out.print("Please enter your Driver's License number: ");
+            dLicense = readInteger(false);
+            // check if customer exists in database if not make a new customer
+			// Customer can view all vehicles, or a subset based on {car type, location, time interval}
+			// when making a reservation see if the customer exists in the database if not make a new customer
+			// by asking info and display the reservation conf no and stuff and PUT the new tuples in the
+			// database
         }
 
 	}
 
 	private void handleClerk(){
-
+		// functionalities for Clerk
 	}
 	
-	private void handleDeleteOption() {
-		int branchId = INVALID_INPUT;
-		while (branchId == INVALID_INPUT) {
-			System.out.print("Please enter the branch ID you wish to delete: ");
-			branchId = readInteger(false);
-			if (branchId != INVALID_INPUT) {
-				delegate.deleteBranch(branchId);
-			}
-		}
-	}
+//	private void handleDeleteOption() {
+//		int branchId = INVALID_INPUT;
+//		while (branchId == INVALID_INPUT) {
+//			System.out.print("Please enter the branch ID you wish to delete: ");
+//			branchId = readInteger(false);
+//			if (branchId != INVALID_INPUT) {
+//				delegate.deleteBranch(branchId);
+//			}
+//		}
+//	}
 	
-	private void handleInsertOption() {
-		int id = INVALID_INPUT;
-		while (id == INVALID_INPUT) {
-			System.out.print("Please enter the branch ID you wish to insert: ");
-			id = readInteger(false);
-		}
-		
-		String name = null;
-		while (name == null || name.length() <= 0) {
-			System.out.print("Please enter the branch name you wish to insert: ");
-			name = readLine().trim();
-		}
-		
-		// branch address is allowed to be null so we don't need to repeatedly ask for the address
-		System.out.print("Please enter the branch address you wish to insert: ");
-		String address = readLine().trim();
-		if (address.length() == 0) {
-			address = null;
-		}
-		
-		String city = null;
-		while (city == null || city.length() <= 0) {
-			System.out.print("Please enter the branch city you wish to insert: ");
-			city = readLine().trim();
-		}
-		
-		int phoneNumber = INVALID_INPUT;
-		while (phoneNumber == INVALID_INPUT) {
-			System.out.print("Please enter the branch phone number you wish to insert: ");
-			phoneNumber = readInteger(true);
-		}
-		
-		BranchModel model = new BranchModel(address,
-											city,
-											id,
-											name,
-											phoneNumber);
-		delegate.insertBranch(model);
-	}
+//	private void handleInsertOption() {
+//		int id = INVALID_INPUT;
+//		while (id == INVALID_INPUT) {
+//			System.out.print("Please enter the branch ID you wish to insert: ");
+//			id = readInteger(false);
+//		}
+//
+//		String name = null;
+//		while (name == null || name.length() <= 0) {
+//			System.out.print("Please enter the branch name you wish to insert: ");
+//			name = readLine().trim();
+//		}
+//
+//		// branch address is allowed to be null so we don't need to repeatedly ask for the address
+//		System.out.print("Please enter the branch address you wish to insert: ");
+//		String address = readLine().trim();
+//		if (address.length() == 0) {
+//			address = null;
+//		}
+//
+//		String city = null;
+//		while (city == null || city.length() <= 0) {
+//			System.out.print("Please enter the branch city you wish to insert: ");
+//			city = readLine().trim();
+//		}
+//
+//		int phoneNumber = INVALID_INPUT;
+//		while (phoneNumber == INVALID_INPUT) {
+//			System.out.print("Please enter the branch phone number you wish to insert: ");
+//			phoneNumber = readInteger(true);
+//		}
+//
+//		BranchModel model = new BranchModel(address,
+//											city,
+//											id,
+//											name,
+//											phoneNumber);
+//		delegate.insertBranch(model);
+//	}
 	
 	private void handleQuitOption() {
 		System.out.println("Good Bye!");
