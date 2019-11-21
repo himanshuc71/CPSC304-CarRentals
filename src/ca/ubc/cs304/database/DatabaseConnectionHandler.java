@@ -3,10 +3,7 @@ package ca.ubc.cs304.database;
 import java.sql.*;
 import java.util.ArrayList;
 
-import ca.ubc.cs304.model.BranchModel;
-import ca.ubc.cs304.model.CustomerModel;
-import ca.ubc.cs304.model.RentalModel;
-import ca.ubc.cs304.model.ReservationModel;
+import ca.ubc.cs304.model.*;
 
 /**
  * This class handles all database related transactions
@@ -38,84 +35,6 @@ public class DatabaseConnectionHandler {
 		}
 	}
 
-//	public void deleteBranch(int branchId) {
-//		try {
-//			PreparedStatement ps = connection.prepareStatement("DELETE FROM branch WHERE branch_id = ?");
-//			ps.setInt(1, branchId);
-//
-//			int rowCount = ps.executeUpdate();
-//			if (rowCount == 0) {
-//				System.out.println(WARNING_TAG + " Branch " + branchId + " does not exist!");
-//			}
-//
-//			connection.commit();
-//
-//			ps.close();
-//		} catch (SQLException e) {
-//			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
-//			rollbackConnection();
-//		}
-//	}
-	
-//	public void insertBranch(BranchModel model) {
-//		try {
-//			PreparedStatement ps = connection.prepareStatement("INSERT INTO branch VALUES (?,?,?,?,?)");
-//			ps.setInt(1, model.getId());
-//			ps.setString(2, model.getName());
-//			ps.setString(3, model.getAddress());
-//			ps.setString(4, model.getCity());
-//			if (model.getPhoneNumber() == 0) {
-//				ps.setNull(5, java.sql.Types.INTEGER);
-//			} else {
-//				ps.setInt(5, model.getPhoneNumber());
-//			}
-//
-//			ps.executeUpdate();
-//			connection.commit();
-//
-//			ps.close();
-//		} catch (SQLException e) {
-//			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
-//			rollbackConnection();
-//		}
-//	}
-	
-//	public BranchModel[] getBranchInfo() {
-//		ArrayList<BranchModel> result = new ArrayList<BranchModel>();
-//
-//		try {
-//			Statement stmt = connection.createStatement();
-//			ResultSet rs = stmt.executeQuery("SELECT * FROM branch");
-//
-////    		// get info on ResultSet
-////    		ResultSetMetaData rsmd = rs.getMetaData();
-////
-////    		System.out.println(" ");
-////
-////    		// display column names;
-////    		for (int i = 0; i < rsmd.getColumnCount(); i++) {
-////    			// get column name and print it
-////    			System.out.printf("%-15s", rsmd.getColumnName(i + 1));
-////    		}
-//
-//			while(rs.next()) {
-//				BranchModel model = new BranchModel(rs.getString("branch_addr"),
-//													rs.getString("branch_city"),
-//													rs.getInt("branch_id"),
-//													rs.getString("branch_name"),
-//													rs.getInt("branch_phone"));
-//				result.add(model);
-//			}
-//
-//			rs.close();
-//			stmt.close();
-//		} catch (SQLException e) {
-//			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
-//		}
-//
-//		return result.toArray(new BranchModel[result.size()]);
-//	}
-
 	public void insertCustomer (CustomerModel customer) {
 	    try {
 	        PreparedStatement ps = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
@@ -133,6 +52,286 @@ public class DatabaseConnectionHandler {
             rollbackConnection();
         }
     }
+
+	public boolean customerExists(int licence) {
+		boolean exists = false;
+		int count = 0;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Customer WHERE dLicense = ?");
+			ps.setInt(1, licence);
+
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				count = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+			if (count == 1) {
+				exists = true;
+			} else if (count == 0) {
+				exists = false;
+			}
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+			exists = false;
+		}
+		return exists;
+	}
+
+	public boolean branchExists(String location, String city) {
+		boolean exists = false;
+		int count = 0;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Branch WHERE location = ? " +
+					"AND city = ?");
+			ps.setString(1, location);
+			ps.setString(2, city);
+
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				count = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+			if (count == 1) {
+				exists = true;
+			} else if (count == 0) {
+				exists = false;
+			}
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+			exists = false;
+		}
+		return exists;
+	}
+
+	public boolean vehicleTypeExists(String vtname) {
+		boolean exists = false;
+		int count = 0;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM VehicleType WHERE " +
+					"vtname = ? ");
+			ps.setString(1, vtname);
+
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				count = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+			if (count == 1) {
+				exists = true;
+			} else if (count == 0) {
+				exists = false;
+			}
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+			exists = false;
+		}
+		return exists;
+	}
+
+	public String getNameFromLicence(int dLicence) {
+		String name = null;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT cname FROM Customer WHERE dLicense = ?");
+			ps.setInt(1, dLicence);
+
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				name = rs.getString(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return name;
+	}
+
+	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		if (location == null && vtname == null && (fromDate != null && toDate != null)) {
+			return numberVehiclesAvailableDates(fromDate, toDate);
+		} else if (location != null && vtname == null && (fromDate == null || toDate == null)) {
+			return numberVehiclesAvailableLocation(location);
+		} else if (location == null && vtname != null && (fromDate == null || toDate == null)) {
+			return numberVehiclesAvailableVTname(vtname);
+		} else if (location != null && vtname != null && (fromDate == null || toDate == null)) {
+			return numberVehiclesAvailableLocationVTname(location, vtname);
+		} else if (location != null && vtname == null) {
+			return numberVehiclesAvailableLocationDates(location, fromDate, toDate);
+		} else if (location == null && vtname != null) {
+			return numberVehiclesAvailableVTnameDates(vtname, fromDate, toDate);
+		} else {
+			int numberOfRows = 0;
+			try {
+				// need to have different cases if any of the inputs are blank
+				// using available status
+				// check the rental table, reservation, vehicle and vehicle type
+				PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM " +
+						"(SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' " +
+						"AND v.location = ? AND v.vtname = ? " +
+						"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
+						"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
+						"BETWEEN r.fromDateTime and r.toDateTime)");
+				ps.setString(1, location);
+				ps.setString(2, vtname);
+				ps.setTimestamp(3, fromDate);
+				ps.setTimestamp(4, toDate);
+
+				ResultSet rs = ps.executeQuery();
+				if (rs.next()) {
+					numberOfRows = rs.getInt(1);
+				}
+				connection.commit();
+				ps.close();
+			} catch (SQLException e) {
+				System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+				rollbackConnection();
+			}
+			return numberOfRows;
+		}
+	}
+
+	private int numberVehiclesAvailableLocation(String location) {
+		int numberOfRows = 0;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Vehicle v WHERE location = ? AND status = 'available'");
+			ps.setString(1, location);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				numberOfRows = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return numberOfRows;
+	}
+
+	private int numberVehiclesAvailableVTname(String vtname) {
+		int numberOfRows = 0;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Vehicle v WHERE vtname = ? AND status = 'available'");
+			ps.setString(1, vtname);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				numberOfRows = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return numberOfRows;
+	}
+
+	private int numberVehiclesAvailableLocationVTname(String location, String vtname) {
+		int numberOfRows = 0;
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Vehicle v WHERE location = ? AND vtname = ? AND status = 'available'");
+			ps.setString(1, location);
+			ps.setString(2, vtname);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				numberOfRows = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return numberOfRows;
+	}
+
+	private int numberVehiclesAvailableDates(Timestamp fromDate, Timestamp toDate) {
+		int numberOfRows = 0;
+		try {
+			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' " +
+					"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
+					"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
+					"BETWEEN r.fromDateTime and r.toDateTime)";
+			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
+			ps.setTimestamp(1, fromDate);
+			ps.setTimestamp(2, toDate);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				numberOfRows = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return numberOfRows;
+	}
+
+	private int numberVehiclesAvailableLocationDates(String location, Timestamp fromDate, Timestamp toDate) {
+		int numberOfRows = 0;
+		try {
+			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.location = ? " +
+					"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
+					"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
+					"BETWEEN r.fromDateTime and r.toDateTime)";
+			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
+			ps.setString(1, location);
+			ps.setTimestamp(2, fromDate);
+			ps.setTimestamp(3, toDate);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				numberOfRows = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return numberOfRows;
+	}
+
+	private int numberVehiclesAvailableVTnameDates(String vtname, Timestamp fromDate, Timestamp toDate) {
+		int numberOfRows = 0;
+		try {
+			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.vtname = ? " +
+					"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
+					"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
+					"BETWEEN r.fromDateTime and r.toDateTime)";
+			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
+			ps.setString(1, vtname);
+			ps.setTimestamp(2, fromDate);
+			ps.setTimestamp(3, toDate);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				numberOfRows = rs.getInt(1);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return numberOfRows;
+	}
+
+	public void makeReservation(CustomerModel customer, VehicleType vtname, BranchModel branch, String fromDate, String toDate) {
+
+	}
 
     // insert rental with reservation
     public void insertRental (int confNo, String cardName, int cardNo, String expDate) {

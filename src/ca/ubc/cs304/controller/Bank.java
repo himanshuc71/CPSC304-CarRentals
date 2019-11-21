@@ -8,6 +8,8 @@ import ca.ubc.cs304.model.CustomerModel;
 import ca.ubc.cs304.ui.LoginWindow;
 import ca.ubc.cs304.ui.TerminalTransactions;
 
+import java.sql.Timestamp;
+
 /**
  * This is the main controller class that will orchestrate everything.
  */
@@ -64,6 +66,15 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 
 	public void insertRental (String cardName, int cardNo, String expDate) {
 		dbHandler.insertRental(cardName, cardNo, expDate);
+	}
+	public boolean customerExists(int dLicence) { return dbHandler.customerExists(dLicence); }
+	public boolean branchExists(String location, String city) {return dbHandler.branchExists(location, city);}
+	public boolean vehicleTypeExists(String vtname){return dbHandler.vehicleTypeExists(vtname);}
+
+	public String getNameFromLicence(int dLicence) { return dbHandler.getNameFromLicence(dLicence); }
+
+	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		return dbHandler.numberVehiclesAvailable(location, vtname, fromDate, toDate);
 	}
 	
 //	/**

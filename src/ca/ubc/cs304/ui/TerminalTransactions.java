@@ -3,9 +3,13 @@ package ca.ubc.cs304.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
 import ca.ubc.cs304.model.BranchModel;
+import ca.ubc.cs304.model.CustomerModel;
 
 /**
  * The class is only responsible for handling terminal text inputs. 
@@ -22,22 +26,14 @@ public class TerminalTransactions {
 	public TerminalTransactions() {
 	}
 
-	/**
-	 * Displays simple text interface
-	 */ 
 	public void showMainMenu(TerminalTransactionsDelegate delegate) {
 		this.delegate = delegate;
-		
-	    bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+		bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 		int choice = INVALID_INPUT;
-		
-		while (choice != 3) {
+
+		while (choice != 5) {
 			System.out.println();
-//			System.out.println("1. Insert branch");
-//			System.out.println("2. Delete branch");
-//			System.out.println("3. Update branch name");
-//			System.out.println("4. Show branch");
-//			System.out.println("5. Quit");
 			System.out.println("1. If you are a Customer");
 			System.out.println("2. If you are a Clerk");
 			System.out.println("3. Quit");
@@ -49,44 +45,203 @@ public class TerminalTransactions {
 
 			if (choice != INVALID_INPUT) {
 				switch (choice) {
-				case 1:  
-					//handleInsertOption();
-					handleCustomer();
-					break;
-				case 2:  
-					//handleDeleteOption();
-					handleClerk();
-					break;
-				case 3:
-					//handleUpdateOption();
-					handleQuitOption();
-					break;
-//				case 4:
-//					delegate.showBranch();
-//					break;
-//				case 5:
-//					handleQuitOption();
-//					break;
-				default:
-					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
-					break;
+					case 1:
+						handleCustomer();
+						break;
+					case 2:
+						handleClerk();
+						break;
+					case 3:
+						handleQuitOption();
+						break;
+					default:
+						System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+						break;
 				}
 			}
-		}		
+		}
 	}
 
-	private void handleCustomer(){
-	    int dLicense = INVALID_INPUT;
-	    while (dLicense == INVALID_INPUT) {
-            System.out.print("Please enter your Driver's License number: ");
-            dLicense = readInteger(false);
-            // check if customer exists in database if not make a new customer
-			// Customer can view all vehicles, or a subset based on {car type, location, time interval}
-			// when making a reservation see if the customer exists in the database if not make a new customer
-			// by asking info and display the reservation conf no and stuff and PUT the new tuples in the
-			// database
-        }
 
+	private void handleCustomer() {
+		int choice = INVALID_INPUT;
+		while (choice != 5) {
+			System.out.println();
+			System.out.println("1. Make a reservation");
+			System.out.println("2. Create an account");
+			System.out.println("3. Back");
+			System.out.println("4. Quit");
+			System.out.print("Please choose one of the above 4 options: ");
+			choice = readInteger(false);
+			System.out.println(" ");
+			if (choice != INVALID_INPUT) {
+				switch (choice) {
+					case 1:
+						makeReservation();
+						break;
+					case 2:
+						createAccount();
+						break;
+					case 3:
+						showMainMenu(delegate);
+						break;
+					case 4:
+						handleQuitOption();
+						break;
+					default:
+						System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+						break;
+				}
+			}
+		}
+	}
+
+	private void createAccount() {
+		int dLicense = INVALID_INPUT, cell = INVALID_INPUT;
+		String name = null, address = null;
+		while (dLicense == INVALID_INPUT) {
+			System.out.print("Please enter your Driver's License number: ");
+			dLicense = readInteger(false);
+		}
+		while (delegate.customerExists(dLicense)) {
+			System.out.print("Licence number already exists. Please enter a different licence number: ");
+			dLicense = readInteger(false);
+		}
+		System.out.print("Lets create your customer account. Please enter your full name: ");
+		name = readLine().trim();
+		while (cell == INVALID_INPUT) {
+			System.out.print("Cellphone number: ");
+			cell = readInteger(false);
+		}
+		System.out.print("Please enter your address: ");
+		address = readLine().trim();
+		CustomerModel customer = new CustomerModel(cell, name, address, dLicense);
+		delegate.insertCustomer(customer);
+		System.out.println();
+		System.out.print("Customer account created");
+		System.out.println();
+		showMainMenu(delegate);
+	}
+
+	private void makeReservation() {
+		Timestamp fromDate, toDate;
+		int dLicense = INVALID_INPUT;
+		while (dLicense == INVALID_INPUT) {
+			System.out.print("Please enter your Driver's License number: ");
+			dLicense = readInteger(false);
+		}
+		while (!delegate.customerExists(dLicense) && dLicense != 1) {
+			System.out.print("Licence number does not exist. Please enter a licence number attached to an account," +
+					" or type 1 to create an account: ");
+			dLicense = readInteger(false);
+		}
+		if (dLicense == 1) {
+			createAccount();
+		}
+		String name = delegate.getNameFromLicence(dLicense);
+		System.out.print("Hello " + name + ", make a reservation based on the following inputs");
+		String[] branch = getBranch();
+		String vtname = getType();
+		fromDate = getDate("From");
+		toDate = getDate("To");
+
+		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
+		System.out.print("There are " + available + " cars available that fit your input.");
+
+	}
+
+	private String[] getBranch() {
+		String location, city;
+		System.out.println();
+		System.out.print("Location: ");
+		location = readLine().trim();
+		System.out.print("City: ");
+		city = readLine().trim();
+		if (!delegate.branchExists(location, city)) {
+			System.out.print("Branch does not exist. Press 1 to enter a different branch or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getBranch();
+					break;
+				case 2:
+					location = null;
+					city = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					location = null;
+					city = null;
+					break;
+			}
+		}
+		return new String[] {location, city};
+	}
+
+	private String getType() {
+		String vtname;
+		System.out.println();
+		System.out.print("Vehicle Type: ");
+		vtname = readLine().trim();
+		if (!delegate.vehicleTypeExists(vtname)) {
+			System.out.print("That vehicle type does not exist. Press 1 to enter a different type or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getType();
+					break;
+				case 2:
+					vtname = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					vtname = null;
+					break;
+			}
+		}
+		return vtname;
+	}
+
+	private Timestamp getDate(String dateType) {
+		System.out.print(dateType + " date (YYYY-MM-DD): ");
+		String date = readLine().trim();
+		if (!validateDate(date)) {
+			System.out.print("Invalid date format. Press 1 to enter a different date or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getDate(dateType);
+					break;
+				case 2:
+					date = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					date = null;
+					break;
+			}
+		}
+		return getTimeStampAsString(date);
+	}
+
+	private boolean validateDate(String dateString) {
+		try {
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+			Date date = format.parse(dateString + " 00:00:00");
+			Timestamp ts = new Timestamp(date.getTime());
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private Timestamp getTimeStampAsString(String dateString) {
+		try {
+			String date = dateString + " 00:00:00";
+			return Timestamp.valueOf(date);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	private void handleClerk() {
