@@ -3,10 +3,7 @@ package ca.ubc.cs304.database;
 import java.sql.*;
 import java.util.ArrayList;
 
-import ca.ubc.cs304.model.BranchModel;
-import ca.ubc.cs304.model.CustomerModel;
-import ca.ubc.cs304.model.RentalModel;
-import ca.ubc.cs304.model.ReservationModel;
+import ca.ubc.cs304.model.*;
 
 /**
  * This class handles all database related transactions
@@ -153,8 +150,12 @@ public class DatabaseConnectionHandler {
 						rs.getString("address"), rs.getLong("dlicense"));
 				rs.close();
 				// rs is the resultSet of all available vehicles
-				rs = s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + "'" + reservation.getVtname()+ "'");
-				rs.next();
+				s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + "'" + reservation.getVtname()+ "'");
+                rs = s.getResultSet();
+                rs.next();
+                Vehicle vehicle = new Vehicle(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
+                        rs.getString(5), rs.getInt(6), rs.getString(7), rs.getString(8),
+                        rs.getString(9), rs.getString(10));
 				// rs1 is the max rental id for new rentalid creation
 				ResultSet rs1 = s1.executeQuery("SELECT MAX(RENTAL.RID) as maxid FROM RENTAL");
 				int rentalId;
@@ -168,10 +169,6 @@ public class DatabaseConnectionHandler {
 						reservation.getdLicense(), rs.getInt("odometer"),
 						cardName, cardNo, expDate, reservation.getConfNo(),
 						reservation.getFromDateTime(), reservation.getToDateTime());
-				rs.close();
-				rs1.close();
-				s.close();
-				s1.close();
 
 				// inserting into db
 				PreparedStatement ps = connection.prepareStatement("INSERT INTO RENTAL VALUES (?,?,?,?,?," +
@@ -189,15 +186,23 @@ public class DatabaseConnectionHandler {
 
 
 				ps.executeUpdate();
-				connection.commit();
+                connection.commit();
 
 				ps.close();
+				// update that vehicle status to be rented
+				s.executeUpdate("UPDATE VEHICLE SET STATUS = 'rented' where VLICENSE = " + "'" + vehicle.getvLicence() + "'");
+                connection.commit();
+                rs.close();
+                rs1.close();
+                s.close();
+                s1.close();
+
 				System.out.println("Hi, " + customer.getCname() + " your rented car " + reservation.getVtname()
 						+ " of license number : " + rental.getvLicense() + " from " +
 						rental.getFromDateTime() + " to " + rental.getToDateTime() + " confirmed.");
 			} else {
 				System.out.println("No reservation was found for the confirmation number: "
-						+ confNo + "please try again.");
+						+ confNo + " please try again.");
 			}
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
