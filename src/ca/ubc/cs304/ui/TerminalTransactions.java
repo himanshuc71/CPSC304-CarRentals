@@ -177,7 +177,7 @@ public class TerminalTransactions {
 							if (cardNo != INVALID_INPUT) {
 								String expDate = null;
 								while (expDate == null) {
-									System.out.println("Enter the Credit Card Expiration Date: ");
+									System.out.println("Enter the Credit Card Expiration Date in format mm/yy: ");
 									expDate = readLine();
 									if (expDate != null) {
 										delegate.insertRental(confNo, cardName, cardNo, expDate);

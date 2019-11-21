@@ -139,44 +139,62 @@ public class DatabaseConnectionHandler {
 	        Statement s = connection.createStatement();
 	        ResultSet rs = s.executeQuery("SELECT * FROM RESERVATION WHERE CONFNO = " + confNo);
 			ReservationModel reservation;
-    		rs.next();
-    		// got reservation
-    		reservation = new ReservationModel(rs.getInt("confNo"), rs.getString("vtname"),
-					rs.getInt("dLicense"), rs.getTimestamp("fromDateTime"), rs.getTimestamp("toDateTime"));
-    		// rs is the resultSet of all available vehicles
-    		rs = s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + reservation.getVtname());
-    		rs.next();
-    		// rs1 is the max rental id for new rentalid creation
-    		ResultSet rs1 = s.executeQuery("SELECT MAX(RENTAL.RID) FROM RENTAL");
-    		rs1.next();
-    		// make a rental model and then insert into the database
-			RentalModel rental = new RentalModel(rs1.getInt("rid") + 1, rs.getString("vlicense"),
-					reservation.getdLicense(), rs.getInt("odometer"),
-					cardName, cardNo, expDate, reservation.getConfNo(),
-					reservation.getFromDateTime(), reservation.getToDateTime());
-			rs.close();
-			rs1.close();
-			s.close();
+			if (rs.next()) {
+				// got reservation
+				reservation = new ReservationModel(rs.getInt("confNo"), rs.getString("vtname"),
+						rs.getInt("dLicense"), rs.getTimestamp("fromDateTime"), rs.getTimestamp("toDateTime"));
+				rs.close();
+				// get customer who made the reservation
+				rs = s.executeQuery("SELECT * FROM CUSTOMER WHERE DLICENSE = " + reservation.getdLicense());
+				rs.next();
+				CustomerModel customer = new CustomerModel(rs.getInt("cellphone"), rs.getString("cName"),
+						rs.getString("address"), rs.getInt("dlicense"));
+				rs.close();
+				// rs is the resultSet of all available vehicles
+				rs = s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + reservation.getVtname());
+				rs.next();
+				// rs1 is the max rental id for new rentalid creation
+				ResultSet rs1 = s.executeQuery("SELECT MAX(RENTAL.RID) FROM RENTAL");
+				int rentalId;
+				if (rs1.next()) {
+					rentalId = rs1.getInt("rid") + 1;
+				} else {
+					rentalId = 101;
+				}
+				// make a rental model and then insert into the database
+				RentalModel rental = new RentalModel(rentalId, rs.getString("vlicense"),
+						reservation.getdLicense(), rs.getInt("odometer"),
+						cardName, cardNo, expDate, reservation.getConfNo(),
+						reservation.getFromDateTime(), reservation.getToDateTime());
+				rs.close();
+				rs1.close();
+				s.close();
 
-			// inserting into db
-			PreparedStatement ps = connection.prepareStatement("INSERT INTO RENTAL VALUES (?,?,?,?,?," +
-					"?,?,?,?,?)");
-			ps.setInt(1, rental.getRid());
-			ps.setString(2, rental.getvLicense());
-			ps.setInt(3, rental.getdLicense());
-			ps.setInt(4, rental.getOdometer());
-			ps.setString(5, rental.getCardName());
-			ps.setInt(6,rental.getCardNo());
-			ps.setString(7, rental.getExpDate());
-			ps.setInt(8, rental.getConfNo());
-			ps.setTimestamp(9, rental.getFromDateTime());
-			ps.setTimestamp(10, rental.getToDateTime());
+				// inserting into db
+				PreparedStatement ps = connection.prepareStatement("INSERT INTO RENTAL VALUES (?,?,?,?,?," +
+						"?,?,?,?,?)");
+				ps.setInt(1, rental.getRid());
+				ps.setString(2, rental.getvLicense());
+				ps.setInt(3, rental.getdLicense());
+				ps.setInt(4, rental.getOdometer());
+				ps.setString(5, rental.getCardName());
+				ps.setInt(6,rental.getCardNo());
+				ps.setString(7, rental.getExpDate());
+				ps.setInt(8, rental.getConfNo());
+				ps.setTimestamp(9, rental.getFromDateTime());
+				ps.setTimestamp(10, rental.getToDateTime());
 
-			ps.executeUpdate();
-			connection.commit();
+				ps.executeUpdate();
+				connection.commit();
 
-			ps.close();
-
+				ps.close();
+				System.out.println("Hi, " + customer.getCname() + " your rented car " + reservation.getVtname()
+						+ " of license number : " + rental.getvLicense() + " from " +
+						rental.getFromDateTime() + " to " + rental.getToDateTime() + " confirmed.");
+			} else {
+				System.out.println("No reservation was found for the confirmation number: "
+						+ confNo + "please try again.");
+			}
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
