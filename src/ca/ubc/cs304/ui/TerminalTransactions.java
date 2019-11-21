@@ -157,7 +157,7 @@ public class TerminalTransactions {
             createAccount();
         }
         String name = delegate.getNameFromLicence(dLicense);
-        System.out.print("Hello " + name + ", make a reservation based on the following inputs");
+        System.out.println("Hello " + name + ", make a reservation based on the following inputs");
 
         System.out.print("Start rental on date (YYYY-MM-DD): ");
         String startDate = readLine().trim();
@@ -193,7 +193,7 @@ public class TerminalTransactions {
             }
         }
 
-
+        delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
     }
 
 	private String[] getBranch() {

@@ -79,6 +79,25 @@ public class DatabaseConnectionHandler {
 		return exists;
 	}
 
+	public CustomerModel getCustomer(long licence) {
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT * FROM Customer WHERE dLicense = ?");
+			ps.setLong(1, licence);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return new CustomerModel(rs.getLong(2), rs.getString(3), rs.getString(4), licence);
+			}
+			connection.commit();
+			ps.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+			return null;
+		}
+		return null;
+	}
+
 	public boolean branchExists(String location, String city) {
 		boolean exists = false;
 		int count = 0;
@@ -338,8 +357,34 @@ public class DatabaseConnectionHandler {
 		return numberOfRows;
 	}
 
-	public void makeReservation(CustomerModel customer, VehicleType vtname, BranchModel branch, String fromDate, String toDate) {
+	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate) {
+		try {
+			Statement s = connection.createStatement();
+			Statement s1 = connection.createStatement();
+			ResultSet rs = s.executeQuery("SELECT max(confNo) as maxConfNo FROM Reservation");
+			if (rs.next()) {
+				int confno = rs.getInt("maxConfNo") + 1;
 
+				PreparedStatement ps = connection.prepareStatement("INSERT INTO Reservation VALUES (?,?,?,?,?)");
+				ps.setInt(1, confno);
+				ps.setString(2, vtname);
+				ps.setLong(3, dLicence);
+				ps.setTimestamp(4, fromDate);
+				ps.setTimestamp(5, toDate);
+
+				ps.executeUpdate();
+				connection.commit();
+
+				ps.close();
+				System.out.println("You've made a reservation for " + fromDate + " to "
+						+ toDate + ". Your confirmation number is " + confno);
+			} else {
+				System.out.println("Unable to make reservation. Please try again.");
+			}
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
 	}
 
     // insert rental with reservation

@@ -22,12 +22,24 @@ public interface TerminalTransactionsDelegate {
 
 	// rental car methods..
 	public void insertRental(int confNo, String cardName, int cardNo, String expDate);
+
 	public void insertRental(String cardName, int cardNo, String expDate);
+
 	public void insertCustomer(CustomerModel customer);
+
 	public boolean customerExists(int dLicence);
+
 	public boolean branchExists(String location, String city);
+
 	public boolean vehicleTypeExists(String vtname);
+
 	public String getNameFromLicence(int dLicence);
+
 	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate);
+
 	public void terminalTransactionsFinished();
+
+	public CustomerModel getCustomer(int licence);
+
+	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate);
 }

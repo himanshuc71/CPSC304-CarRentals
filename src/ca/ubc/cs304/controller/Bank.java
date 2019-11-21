@@ -76,7 +76,12 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
 		return dbHandler.numberVehiclesAvailable(location, vtname, fromDate, toDate);
 	}
-	
+
+	public CustomerModel getCustomer(int licence) { return dbHandler.getCustomer(licence); }
+	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate) {
+		dbHandler.makeReservation(dLicence, vtname, fromDate, toDate);
+	}
+
 //	/**
 //	 * TermainalTransactionsDelegate Implementation
 //	 *
