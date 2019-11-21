@@ -3,23 +3,23 @@ package ca.ubc.cs304.model;
 import java.util.Objects;
 
 public class CustomerModel {
-    private final int cellphone;
+    private final long cellphone;
     private final String cname;
     private final String address;
-    private final int dLicense;
+    private final long dLicense;
 
-    public CustomerModel(int cellphone, String cname, String address, int dLicense ){
+    public CustomerModel(long cellphone, String cname, String address, long dLicense ){
         this.cellphone = cellphone;
         this.cname = cname;
         this.address = address;
         this.dLicense = dLicense;
     }
 
-    public int getCellphone() {
+    public long getCellphone() {
         return cellphone;
     }
 
-    public int getdLicense() {
+    public long getdLicense() {
         return dLicense;
     }
 
@@ -46,7 +46,7 @@ public class CustomerModel {
 
     @Override
     public String toString() {
-        return "Customer name: " + this.cname + " Cellphone no: " + Integer.toString(this.cellphone) +
-                " Driver's License: " + Integer.toString(this.dLicense) + " Address: " + this.address;
+        return "Customer name: " + this.cname + " Cellphone no: " + (this.cellphone) +
+                " Driver's License: " + (this.dLicense) + " Address: " + this.address;
     }
 }

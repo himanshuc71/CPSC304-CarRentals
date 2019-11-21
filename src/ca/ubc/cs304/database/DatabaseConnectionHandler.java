@@ -119,10 +119,10 @@ public class DatabaseConnectionHandler {
 	public void insertCustomer (CustomerModel customer) {
 	    try {
 	        PreparedStatement ps = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
-	        ps.setInt(1, customer.getCellphone());
+	        ps.setLong(1, customer.getCellphone());
             ps.setString(2, customer.getCname());
             ps.setString(3, customer.getAddress());
-            ps.setInt(4, customer.getdLicense());
+            ps.setLong(4, customer.getdLicense());
 
             ps.executeUpdate();
             connection.commit();
@@ -138,27 +138,28 @@ public class DatabaseConnectionHandler {
     public void insertRental (int confNo, String cardName, int cardNo, String expDate) {
 	    try {
 	        Statement s = connection.createStatement();
+            Statement s1 = connection.createStatement();
 	        ResultSet rs = s.executeQuery("SELECT * FROM RESERVATION WHERE CONFNO = " + confNo);
 			ReservationModel reservation;
 			if (rs.next()) {
 				// got reservation
 				reservation = new ReservationModel(rs.getInt("confNo"), rs.getString("vtname"),
-						rs.getInt("dLicense"), rs.getTimestamp("fromDateTime"), rs.getTimestamp("toDateTime"));
+						rs.getLong("dLicense"), rs.getTimestamp("fromDateTime"), rs.getTimestamp("toDateTime"));
 				rs.close();
 				// get customer who made the reservation
 				rs = s.executeQuery("SELECT * FROM CUSTOMER WHERE DLICENSE = " + reservation.getdLicense());
 				rs.next();
-				CustomerModel customer = new CustomerModel(rs.getInt("cellphone"), rs.getString("cName"),
-						rs.getString("address"), rs.getInt("dlicense"));
+				CustomerModel customer = new CustomerModel(rs.getLong("cellphone"), rs.getString("cName"),
+						rs.getString("address"), rs.getLong("dlicense"));
 				rs.close();
 				// rs is the resultSet of all available vehicles
-				rs = s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + reservation.getVtname());
+				rs = s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + "'" + reservation.getVtname()+ "'");
 				rs.next();
 				// rs1 is the max rental id for new rentalid creation
-				ResultSet rs1 = s.executeQuery("SELECT MAX(RENTAL.RID) FROM RENTAL");
+				ResultSet rs1 = s1.executeQuery("SELECT MAX(RENTAL.RID) as maxid FROM RENTAL");
 				int rentalId;
 				if (rs1.next()) {
-					rentalId = rs1.getInt("rid") + 1;
+					rentalId = rs1.getInt("maxid") + 1;
 				} else {
 					rentalId = 101;
 				}
@@ -170,20 +171,22 @@ public class DatabaseConnectionHandler {
 				rs.close();
 				rs1.close();
 				s.close();
+				s1.close();
 
 				// inserting into db
 				PreparedStatement ps = connection.prepareStatement("INSERT INTO RENTAL VALUES (?,?,?,?,?," +
 						"?,?,?,?,?)");
 				ps.setInt(1, rental.getRid());
 				ps.setString(2, rental.getvLicense());
-				ps.setInt(3, rental.getdLicense());
-				ps.setInt(4, rental.getOdometer());
-				ps.setString(5, rental.getCardName());
-				ps.setInt(6,rental.getCardNo());
-				ps.setString(7, rental.getExpDate());
-				ps.setInt(8, rental.getConfNo());
-				ps.setTimestamp(9, rental.getFromDateTime());
-				ps.setTimestamp(10, rental.getToDateTime());
+				ps.setLong(3, rental.getdLicense());
+                ps.setTimestamp(4, rental.getFromDateTime());
+                ps.setTimestamp(5, rental.getToDateTime());
+				ps.setInt(6, rental.getOdometer());
+				ps.setString(7, rental.getCardName());
+				ps.setLong(8,rental.getCardNo());
+				ps.setString(9, rental.getExpDate());
+				ps.setInt(10, rental.getConfNo());
+
 
 				ps.executeUpdate();
 				connection.commit();

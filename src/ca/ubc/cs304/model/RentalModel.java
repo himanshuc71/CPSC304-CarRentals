@@ -6,17 +6,18 @@ import java.util.Objects;
 public class RentalModel {
     private final int rid;
     private final String vLicense;
-    private final int dLicense;
-    private final int odometer;
-    private final String cardName;
-    private final int cardNo;
-    private final String expDate;
-    private final int confNo;
+    private final long dLicense;
     private final Timestamp fromDateTime;
     private final Timestamp toDateTime;
+    private final int odometer;
+    private final String cardName;
+    private final long cardNo;
+    private final String expDate;
+    private final int confNo;
 
-    public RentalModel(int rid, String vLicense, int dLicense, int odometer, String cardName,
-            int cardNo, String expDate, int confNo, Timestamp fromDateTime, Timestamp toDateTime) {
+
+    public RentalModel(int rid, String vLicense, long dLicense, int odometer, String cardName,
+            long cardNo, String expDate, int confNo, Timestamp fromDateTime, Timestamp toDateTime) {
         this.rid = rid;
         this.vLicense = vLicense;
         this.dLicense = dLicense;
@@ -37,7 +38,7 @@ public class RentalModel {
         return vLicense;
     }
 
-    public int getdLicense() {
+    public long getdLicense() {
         return dLicense;
     }
 
@@ -49,7 +50,7 @@ public class RentalModel {
         return cardName;
     }
 
-    public int getCardNo() {
+    public long getCardNo() {
         return cardNo;
     }
 

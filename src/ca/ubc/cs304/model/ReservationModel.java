@@ -6,11 +6,11 @@ import java.util.Objects;
 public class ReservationModel {
     private final int confNo;
     private final String vtname;
-    private final int dLicense;
+    private final long dLicense;
     private final Timestamp fromDateTime;
     private final Timestamp toDateTime;
 
-    public ReservationModel(int confNo, String vtname, int dLicense, Timestamp fromDateTime,
+    public ReservationModel(int confNo, String vtname, long dLicense, Timestamp fromDateTime,
                             Timestamp toDateTime){
         this.confNo = confNo;
         this.vtname = vtname;
@@ -27,7 +27,7 @@ public class ReservationModel {
         return vtname;
     }
 
-    public int getdLicense() {
+    public long getdLicense() {
         return dLicense;
     }
 
