@@ -21,6 +21,7 @@ public interface TerminalTransactionsDelegate {
 	// rental car methods..
 	public void insertCustomer(CustomerModel customer);
 	public void insertRental(int confNo, String cardName, int cardNo, String expDate);
+	public void insertRental(String cardName, int cardNo, String expDate);
 	
 	public void terminalTransactionsFinished();
 }

@@ -191,8 +191,9 @@ public class TerminalTransactions {
         }
     }
 
-    private void handleRentalWOReservation(){
+    private void handleRentalWOReservation() {
         //TODO
+		//delegate.insertRental(cardName, cardNo, expDate);
     }
 
     private void handleReturn(){

@@ -134,6 +134,7 @@ public class DatabaseConnectionHandler {
         }
     }
 
+    // insert rental with reservation
     public void insertRental (int confNo, String cardName, int cardNo, String expDate) {
 	    try {
 	        Statement s = connection.createStatement();
@@ -200,6 +201,13 @@ public class DatabaseConnectionHandler {
             rollbackConnection();
         }
     }
+
+	// insert rental W/O reservation
+	public void insertRental (String cardName, int cardNo, String expDate) {
+		// make a reservation
+
+		// call insert rental with confNo
+	}
 	
 //	public void updateBranch(int id, String name) {
 //		try {
