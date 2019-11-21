@@ -6,7 +6,7 @@ import java.util.Objects;
 public class RentalModel {
     private final int rid;
     private final String vLicense;
-    private final int cellPhone;
+    private final int dLicense;
     private final int odometer;
     private final String cardName;
     private final int cardNo;
@@ -15,11 +15,11 @@ public class RentalModel {
     private final Timestamp fromDateTime;
     private final Timestamp toDateTime;
 
-    public RentalModel(int rid, String vLicense, int cellPhone, int odometer, String cardName,
+    public RentalModel(int rid, String vLicense, int dLicense, int odometer, String cardName,
             int cardNo, String expDate, int confNo, Timestamp fromDateTime, Timestamp toDateTime) {
         this.rid = rid;
         this.vLicense = vLicense;
-        this.cellPhone = cellPhone;
+        this.dLicense = dLicense;
         this.odometer = odometer;
         this.cardName = cardName;
         this.cardNo = cardNo;
@@ -33,12 +33,12 @@ public class RentalModel {
         return rid;
     }
 
-    public String getVid() {
+    public String getvLicense() {
         return vLicense;
     }
 
-    public int getCellPhone() {
-        return cellPhone;
+    public int getdLicense() {
+        return dLicense;
     }
 
     public int getOdometer() {

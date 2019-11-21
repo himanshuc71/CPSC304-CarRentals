@@ -94,12 +94,17 @@ public class TerminalTransactions {
         int choice = INVALID_INPUT;
         while (choice != 7) {
             System.out.println();
-            System.out.print("1. Rent a vehicle for a Customer ");
-            System.out.print("2. Return a vehicle for a Customer ");
-            System.out.print("3. Generate daily rentals ");
-            System.out.print("4. Generate daily rentals by branch ");
-            System.out.print("5. Generate daily returns ");
-            System.out.print("6. Generate daily returns by branch ");
+            System.out.println("1. Rent a vehicle for a Customer ");
+            System.out.println("2. Return a vehicle for a Customer ");
+            System.out.println("3. Generate daily rentals ");
+            System.out.println("4. Generate daily rentals by branch ");
+            System.out.println("5. Generate daily returns ");
+            System.out.println("6. Generate daily returns by branch ");
+            System.out.println("7. Go back to the main menu");
+
+            System.out.print("Please choose one of the above 7 options: ");
+
+            System.out.println();
 
             choice = readInteger(false);
 
@@ -138,14 +143,15 @@ public class TerminalTransactions {
 
     private void handleRental() {
 	    String reserve = null;
-	    while (reserve == null || reserve.length() <= 0 || !reserve.toLowerCase().equals("y")
-                || !reserve.toLowerCase().equals("n")) {
+	    while (reserve == null || reserve.length() <= 0) {
             System.out.println("Is there a reservation? Enter y/n: ");
             reserve = readLine().trim();
             if (reserve.toLowerCase().equals("y")) {
                 handleRentalWReservation();
+                break;
             } else if (reserve.toLowerCase().equals("n")) {
                 handleRentalWOReservation();
+                break;
             } else {
                 System.out.println("Invalid input try again");
             }
@@ -159,7 +165,28 @@ public class TerminalTransactions {
             System.out.println("Enter the confirmation number for the Reservation: ");
             confNo = readInteger(false);
             if (confNo != INVALID_INPUT) {
-                delegate.insertRental(confNo);
+            	String cardName = null;
+            	while (cardName == null) {
+					System.out.println("Enter the Credit Card Name: ");
+					cardName = readLine();
+					if (cardName != null) {
+						int cardNo = INVALID_INPUT;
+						while (cardNo == INVALID_INPUT) {
+							System.out.println("Enter the Credit Card No: ");
+							cardNo = readInteger(false);
+							if (cardNo != INVALID_INPUT) {
+								String expDate = null;
+								while (expDate == null) {
+									System.out.println("Enter the Credit Card Expiration Date: ");
+									expDate = readLine();
+									if (expDate != null) {
+										delegate.insertRental(confNo, cardName, cardNo, expDate);
+									}
+								}
+							}
+						}
+					}
+				}
             }
         }
     }
@@ -189,7 +216,7 @@ public class TerminalTransactions {
     }
 
     private void goBackToMainMenu() {
-        //TODO
+        showMainMenu(delegate);
     }
 	
 //	private void handleDeleteOption() {

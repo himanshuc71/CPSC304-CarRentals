@@ -27,7 +27,7 @@ public class ReservationModel {
         return vtname;
     }
 
-    public int getCellphone() {
+    public int getdLicense() {
         return dLicense;
     }
 

@@ -58,8 +58,8 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 		dbHandler.insertCustomer(customer);
 	}
 
-	public void insertRental (int confNo) {
-	    dbHandler.insertRental(confNo);
+	public void insertRental (int confNo, String cardName, int cardNo, String expDate) {
+	    dbHandler.insertRental(confNo, cardName, cardNo, expDate);
     }
 	
 //	/**

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
+import ca.ubc.cs304.model.RentalModel;
 import ca.ubc.cs304.model.ReservationModel;
 
 /**
@@ -133,18 +134,49 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public void insertRental (int confNo) {
+    public void insertRental (int confNo, String cardName, int cardNo, String expDate) {
 	    try {
 	        Statement s = connection.createStatement();
 	        ResultSet rs = s.executeQuery("SELECT * FROM RESERVATION WHERE CONFNO = " + confNo);
-	        //get info on ResultSet
-    		ResultSetMetaData rsmd = rs.getMetaData();
 			ReservationModel reservation;
-    		while (rs.next()) {
-    			reservation = new ReservationModel(rs.getInt("confNo"), rs.getString("vtname"),
-						rs.getInt("dLicense"), rs.getTimestamp("fromDateTime"),
-						rs.getTimestamp("toDateTime"));
-			}
+    		rs.next();
+    		// got reservation
+    		reservation = new ReservationModel(rs.getInt("confNo"), rs.getString("vtname"),
+					rs.getInt("dLicense"), rs.getTimestamp("fromDateTime"), rs.getTimestamp("toDateTime"));
+    		// rs is the resultSet of all available vehicles
+    		rs = s.executeQuery("SELECT * FROM VEHICLE WHERE STATUS = 'available' AND VTNAME = " + reservation.getVtname());
+    		rs.next();
+    		// rs1 is the max rental id for new rentalid creation
+    		ResultSet rs1 = s.executeQuery("SELECT MAX(RENTAL.RID) FROM RENTAL");
+    		rs1.next();
+    		// make a rental model and then insert into the database
+			RentalModel rental = new RentalModel(rs1.getInt("rid") + 1, rs.getString("vlicense"),
+					reservation.getdLicense(), rs.getInt("odometer"),
+					cardName, cardNo, expDate, reservation.getConfNo(),
+					reservation.getFromDateTime(), reservation.getToDateTime());
+			rs.close();
+			rs1.close();
+			s.close();
+
+			// inserting into db
+			PreparedStatement ps = connection.prepareStatement("INSERT INTO RENTAL VALUES (?,?,?,?,?," +
+					"?,?,?,?,?)");
+			ps.setInt(1, rental.getRid());
+			ps.setString(2, rental.getvLicense());
+			ps.setInt(3, rental.getdLicense());
+			ps.setInt(4, rental.getOdometer());
+			ps.setString(5, rental.getCardName());
+			ps.setInt(6,rental.getCardNo());
+			ps.setString(7, rental.getExpDate());
+			ps.setInt(8, rental.getConfNo());
+			ps.setTimestamp(9, rental.getFromDateTime());
+			ps.setTimestamp(10, rental.getToDateTime());
+
+			ps.executeUpdate();
+			connection.commit();
+
+			ps.close();
+
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
