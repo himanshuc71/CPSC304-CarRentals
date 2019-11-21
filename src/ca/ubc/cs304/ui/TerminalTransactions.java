@@ -3,6 +3,7 @@ package ca.ubc.cs304.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,25 +68,29 @@ public class TerminalTransactions {
 		int choice = INVALID_INPUT;
 		while (choice != 5) {
 			System.out.println();
-			System.out.println("1. Make a reservation");
-			System.out.println("2. Create an account");
-			System.out.println("3. Back");
-			System.out.println("4. Quit");
+			System.out.println("1. See cars available");
+            System.out.println("2. Make a reservation");
+            System.out.println("3. Create an account");
+			System.out.println("4. Back");
+			System.out.println("5. Quit");
 			System.out.print("Please choose one of the above 4 options: ");
 			choice = readInteger(false);
 			System.out.println(" ");
 			if (choice != INVALID_INPUT) {
 				switch (choice) {
 					case 1:
-						makeReservation();
+                        findNumVehicles();
 						break;
 					case 2:
-						createAccount();
+						makeReservation();
 						break;
-					case 3:
+                    case 3:
+                        createAccount();
+                        break;
+					case 4:
 						showMainMenu(delegate);
 						break;
-					case 4:
+					case 5:
 						handleQuitOption();
 						break;
 					default:
@@ -123,23 +128,9 @@ public class TerminalTransactions {
 		showMainMenu(delegate);
 	}
 
-	private void makeReservation() {
+	private void findNumVehicles() {
 		Timestamp fromDate, toDate;
-		int dLicense = INVALID_INPUT;
-		while (dLicense == INVALID_INPUT) {
-			System.out.print("Please enter your Driver's License number: ");
-			dLicense = readInteger(false);
-		}
-		while (!delegate.customerExists(dLicense) && dLicense != 1) {
-			System.out.print("Licence number does not exist. Please enter a licence number attached to an account," +
-					" or type 1 to create an account: ");
-			dLicense = readInteger(false);
-		}
-		if (dLicense == 1) {
-			createAccount();
-		}
-		String name = delegate.getNameFromLicence(dLicense);
-		System.out.print("Hello " + name + ", make a reservation based on the following inputs");
+		System.out.print("Find vehicles available based on the following inputs:");
 		String[] branch = getBranch();
 		String vtname = getType();
 		fromDate = getDate("From");
@@ -149,6 +140,61 @@ public class TerminalTransactions {
 		System.out.print("There are " + available + " cars available that fit your input.");
 
 	}
+
+	private void makeReservation() {
+        Timestamp fromDate, toDate;
+        int dLicense = INVALID_INPUT;
+        while (dLicense == INVALID_INPUT) {
+            System.out.print("Please enter your Driver's License number: ");
+            dLicense = readInteger(false);
+        }
+        while (!delegate.customerExists(dLicense) && dLicense != 1) {
+            System.out.print("Licence number does not exist. Please enter a licence number attached to an account," +
+                    " or type 1 to create an account: ");
+            dLicense = readInteger(false);
+        }
+        if (dLicense == 1) {
+            createAccount();
+        }
+        String name = delegate.getNameFromLicence(dLicense);
+        System.out.print("Hello " + name + ", make a reservation based on the following inputs");
+
+        System.out.print("Start rental on date (YYYY-MM-DD): ");
+        String startDate = readLine().trim();
+        if (!validateDate(startDate)) {
+            System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
+            startDate = readLine().trim();
+        }
+        System.out.print("End rental on date (YYYY-MM-DD): ");
+        String endDate = readLine().trim();
+        if (!validateDate(endDate)) {
+            System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
+            endDate = readLine().trim();
+        }
+        Timestamp startDateTimestamp = getTimeStampAsString(startDate);
+        Timestamp endDateTimestamp = getTimeStampAsString(endDate);
+
+        System.out.print("Vehicle Type (Compact, Economy, Mid-size, Standard, Full-size, SUV, Truck): ");
+        String vtname = readLine().trim();
+        if (!(delegate.vehicleTypeExists(vtname))) {
+            System.out.print("Invalid vehicle type. Press 1 to re-enter, or 2 to skip: ");
+            int choice = readInteger(true);
+            switch (choice) {
+                case 1:
+                    vtname = readLine().trim();
+                    break;
+                case 2:
+                    vtname = null;
+                    break;
+                default:
+                    System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+                    vtname = null;
+                    break;
+            }
+        }
+
+
+    }
 
 	private String[] getBranch() {
 		String location, city;
@@ -169,10 +215,9 @@ public class TerminalTransactions {
 					city = null;
 					break;
 				default:
-					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					System.out.println(WARNING_TAG + " The input that you entered was not a valid option. Please re-enter: ");
 					location = null;
 					city = null;
-					break;
 			}
 		}
 		return new String[] {location, city};
