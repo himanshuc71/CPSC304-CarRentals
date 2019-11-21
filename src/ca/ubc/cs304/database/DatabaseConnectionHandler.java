@@ -172,16 +172,19 @@ public class DatabaseConnectionHandler {
 				// need to have different cases if any of the inputs are blank
 				// using available status
 				// check the rental table, reservation, vehicle and vehicle type
-				PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM " +
-						"(SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' " +
-						"AND v.location = ? AND v.vtname = ? " +
-						"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
-						"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
-						"BETWEEN r.fromDateTime and r.toDateTime)");
+				PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM (SELECT v.vlicense " +
+						"FROM Vehicle v WHERE v.status = 'available' AND v.location = ? AND v.vtname = ? " +
+						"MINUS " +
+						"SELECT r.vlicense " +
+						"FROM Rental r " +
+						"WHERE r.fromDateTime BETWEEN ? and ? " +
+						"OR r.toDateTime BETWEEN ? and ?)");
 				ps.setString(1, location);
 				ps.setString(2, vtname);
 				ps.setTimestamp(3, fromDate);
 				ps.setTimestamp(4, toDate);
+				ps.setTimestamp(5, fromDate);
+				ps.setTimestamp(6, toDate);
 
 				ResultSet rs = ps.executeQuery();
 				if (rs.next()) {
@@ -259,12 +262,14 @@ public class DatabaseConnectionHandler {
 		int numberOfRows = 0;
 		try {
 			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' " +
-					"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
-					"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
-					"BETWEEN r.fromDateTime and r.toDateTime)";
+					"MINUS SELECT r.vlicense FROM Rental r WHERE r.fromDateTime " +
+					"BETWEEN ? and ? OR r.toDateTime " +
+					"BETWEEN ? and ?)";
 			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
 			ps.setTimestamp(1, fromDate);
 			ps.setTimestamp(2, toDate);
+			ps.setTimestamp(3, fromDate);
+			ps.setTimestamp(4, toDate);
 
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
@@ -283,13 +288,15 @@ public class DatabaseConnectionHandler {
 		int numberOfRows = 0;
 		try {
 			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.location = ? " +
-					"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
-					"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
-					"BETWEEN r.fromDateTime and r.toDateTime)";
+					"MINUS SELECT r.vlicense FROM Rental r WHERE r.fromDateTime " +
+					"BETWEEN ? and ? OR r.toDateTime " +
+					"BETWEEN ? and ?)";
 			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
 			ps.setString(1, location);
 			ps.setTimestamp(2, fromDate);
 			ps.setTimestamp(3, toDate);
+			ps.setTimestamp(4, fromDate);
+			ps.setTimestamp(5, toDate);
 
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
@@ -308,13 +315,15 @@ public class DatabaseConnectionHandler {
 		int numberOfRows = 0;
 		try {
 			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.vtname = ? " +
-					"MINUS SELECT r.vlicense FROM Rental r WHERE ? " +
-					"BETWEEN r.fromDateTime and r.toDateTime OR ? " +
-					"BETWEEN r.fromDateTime and r.toDateTime)";
+					"MINUS SELECT r.vlicense FROM Rental r WHERE r.fromDateTime " +
+					"BETWEEN ? and ? OR r.toDateTime " +
+					"BETWEEN ? and ?)";
 			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
 			ps.setString(1, vtname);
 			ps.setTimestamp(2, fromDate);
 			ps.setTimestamp(3, toDate);
+			ps.setTimestamp(4, fromDate);
+			ps.setTimestamp(5, toDate);
 
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
