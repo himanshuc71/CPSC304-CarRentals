@@ -81,6 +81,9 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate) {
 		dbHandler.makeReservation(dLicence, vtname, fromDate, toDate);
 	}
+	public boolean isValidReservation(String location, String vtname, Timestamp startDateTimestamp, Timestamp endDate){
+		return dbHandler.isValidReservation(location, vtname, startDateTimestamp, endDate);
+	}
 
 //	/**
 //	 * TermainalTransactionsDelegate Implementation

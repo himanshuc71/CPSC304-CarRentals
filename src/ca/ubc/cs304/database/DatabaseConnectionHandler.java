@@ -387,6 +387,10 @@ public class DatabaseConnectionHandler {
 		}
 	}
 
+	public boolean isValidReservation(String location, String vtnme, Timestamp startDate, Timestamp endDate) {
+		return numberVehiclesAvailable(location, vtnme, startDate, endDate) > 0;
+	}
+
     // insert rental with reservation
     public void insertRental (int confNo, String cardName, int cardNo, String expDate) {
 	    try {

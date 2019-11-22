@@ -3,6 +3,7 @@ package ca.ubc.cs304.delegates;
 import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 
 /**
@@ -42,4 +43,6 @@ public interface TerminalTransactionsDelegate {
 	public CustomerModel getCustomer(int licence);
 
 	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate);
+
+	public boolean isValidReservation(String location, String vtname, Timestamp startDateTimestamp, Timestamp endDate);
 }

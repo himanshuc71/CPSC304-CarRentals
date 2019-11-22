@@ -7,6 +7,10 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.SimpleTimeZone;
+import java.util.logging.SimpleFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
 import ca.ubc.cs304.model.BranchModel;
@@ -164,8 +168,7 @@ public class TerminalTransactions {
             System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
             startDate = readLine().trim();
         }
-		System.out.print("Pickup time (HH:MM): ");
-		String startTime = readLine().trim();
+		String startTime = getTime();
 
 		System.out.print("End rental on date (YYYY-MM-DD): ");
         String endDate = readLine().trim();
@@ -173,35 +176,23 @@ public class TerminalTransactions {
             System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
             endDate = readLine().trim();
         }
-		System.out.print("Dropoff time (HH:MM): ");
-		String endTime = readLine().trim();
+		String endTime = getTime();
 
 		Timestamp startDateTimestamp = getTimeStampWithTime(startDate, startTime);
         Timestamp endDateTimestamp = getTimeStampWithTime(endDate, endTime);
 
-        System.out.print("Vehicle Type (Compact, Economy, Mid-size, Standard, Full-size, SUV, Truck): ");
-        String vtname = readLine().trim();
-        while (!(delegate.vehicleTypeExists(vtname))) {
-            System.out.print("Invalid vehicle type. Re-enter, or press 2 to skip: ");
-            int choice = readInteger(true);
-            switch (choice) {
-                case 1:
-                    vtname = readLine().trim();
-                    break;
-                case 2:
-                    vtname = null;
-                    break;
-                default:
-                    System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
-                    break;
-            }
-        }
+        String vtname = getType();
         if (startDateTimestamp == null || endDateTimestamp == null) {
         	System.out.println("Unable to make a reservation.");
         	handleCustomer();
 		} else {
-			delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
-			handleCustomer();
+        	if (delegate.isValidReservation(null, vtname, startDateTimestamp, endDateTimestamp)) {
+				delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
+				handleCustomer();
+			} else {
+				System.out.println("Unable to make a reservation with the dates and/or Vehicle Type entered.");
+				handleCustomer();
+			}
 		}
     }
 
@@ -235,7 +226,7 @@ public class TerminalTransactions {
 	private String getType() {
 		String vtname;
 		System.out.println();
-		System.out.print("Vehicle Type: ");
+		System.out.print("Vehicle Type (Compact, Economy, Mid-size, Standard, Full-size, SUV, Truck): ");
 		vtname = readLine().trim();
 		if (!delegate.vehicleTypeExists(vtname)) {
 			System.out.print("That vehicle type does not exist. Press 1 to enter a different type or 2 to skip: ");
@@ -276,9 +267,33 @@ public class TerminalTransactions {
 			}
 		}
 		System.out.print("At time (HH:MM): ");
-		String time = readLine().trim();
+		String time = getTime();
 		return getTimeStampWithTime(date, time);
 	}
+
+	private String getTime() {
+		System.out.print("At time (HH:mm): ");
+		String time = readLine().trim();
+		if (!validateTime(time)) {
+			System.out.print("Invalid time format. Press 1 to enter a different date or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getTime();
+					break;
+				case 2:
+					time = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					time = null;
+					break;
+			}
+		}
+		return time;
+	}
+
+
 
 	private boolean validateDate(String dateString) {
 		try {
@@ -286,6 +301,20 @@ public class TerminalTransactions {
 			Date date = format.parse(dateString + " 00:00:00");
 			Timestamp ts = new Timestamp(date.getTime());
 			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private boolean validateTime(String timeString) {
+		try {
+			Pattern pattern;
+			Matcher matcher;
+			String TIME24HOURS_PATTERN =
+					"([01]?[0-9]|2[0-3]):[0-5][0-9]";
+			pattern = Pattern.compile(TIME24HOURS_PATTERN);
+			matcher = pattern.matcher(timeString);
+	   		return matcher.matches();
 		} catch (Exception e) {
 			return false;
 		}
@@ -302,8 +331,13 @@ public class TerminalTransactions {
 
 	private Timestamp getTimeStampWithTime(String dateString, String timeString) {
 		try {
-			String date = dateString + " " + timeString + ":00";
-			return Timestamp.valueOf(date);
+			if (timeString == null) {
+				String date = dateString + " " + "00:00:00";
+				return Timestamp.valueOf(date);
+			} else {
+				String date = dateString + " " + timeString + ":00";
+				return Timestamp.valueOf(date);
+			}
 		} catch (Exception e) {
 			return null;
 		}
