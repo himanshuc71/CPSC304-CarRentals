@@ -101,22 +101,22 @@ public class TerminalTransactions {
 		}
 	}
 
-	private void createAccount() {
-		int dLicense = INVALID_INPUT, cell = INVALID_INPUT;
+	private CustomerModel createAccount() {
+		long dLicense = INVALID_INPUT, cell = INVALID_INPUT;
 		String name = null, address = null;
 		while (dLicense == INVALID_INPUT) {
 			System.out.print("Please enter your Driver's License number: ");
-			dLicense = readInteger(false);
+			dLicense = readLong(false);
 		}
 		while (delegate.customerExists(dLicense)) {
 			System.out.print("Licence number already exists. Please enter a different licence number: ");
-			dLicense = readInteger(false);
+			dLicense = readLong(false);
 		}
 		System.out.print("Lets create your customer account. Please enter your full name: ");
 		name = readLine().trim();
 		while (cell == INVALID_INPUT) {
 			System.out.print("Cellphone number: ");
-			cell = readInteger(false);
+			cell = readLong(false);
 		}
 		System.out.print("Please enter your address: ");
 		address = readLine().trim();
@@ -125,7 +125,7 @@ public class TerminalTransactions {
 		System.out.println();
 		System.out.print("Customer account created");
 		System.out.println();
-		showMainMenu(delegate);
+		return customer;
 	}
 
 	private void findNumVehicles() {
@@ -143,18 +143,19 @@ public class TerminalTransactions {
 
 	private void makeReservation() {
         Timestamp fromDate, toDate;
-        int dLicense = INVALID_INPUT;
+        long dLicense = INVALID_INPUT;
         while (dLicense == INVALID_INPUT) {
             System.out.print("Please enter your Driver's License number: ");
-            dLicense = readInteger(false);
+            dLicense = readLong(false);
         }
         while (!delegate.customerExists(dLicense) && dLicense != 1) {
             System.out.print("Licence number does not exist. Please enter a licence number attached to an account," +
                     " or type 1 to create an account: ");
-            dLicense = readInteger(false);
+            dLicense = readLong(false);
         }
         if (dLicense == 1) {
-            createAccount();
+            CustomerModel customer = createAccount();
+            dLicense = customer.getdLicense();
         }
         String name = delegate.getNameFromLicence(dLicense);
         System.out.println("Hello " + name + ", make a reservation based on the following inputs");
@@ -192,8 +193,13 @@ public class TerminalTransactions {
                     break;
             }
         }
-
-        delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
+        if (startDateTimestamp == null || endDateTimestamp == null) {
+        	System.out.println("Unable to make a reservation.");
+        	handleCustomer();
+		} else {
+			delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
+			handleCustomer();
+		}
     }
 
 	private String[] getBranch() {
@@ -514,6 +520,24 @@ public class TerminalTransactions {
 				input = EMPTY_INPUT;
 			} else {
 				System.out.println(WARNING_TAG + " Your input was not an integer");
+			}
+		}
+		return input;
+	}
+
+	private long readLong(boolean allowEmpty) {
+		String line = null;
+		long input = INVALID_INPUT;
+		try {
+			line = bufferedReader.readLine();
+			input = Long.parseLong(line);
+		} catch (IOException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+		} catch (NumberFormatException e) {
+			if (allowEmpty && line.length() == 0) {
+				input = EMPTY_INPUT;
+			} else {
+				System.out.println(WARNING_TAG + " Your input was not an long");
 			}
 		}
 		return input;

@@ -67,11 +67,11 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public void insertRental (String cardName, int cardNo, String expDate) {
 		dbHandler.insertRental(cardName, cardNo, expDate);
 	}
-	public boolean customerExists(int dLicence) { return dbHandler.customerExists(dLicence); }
+	public boolean customerExists(long dLicence) { return dbHandler.customerExists(dLicence); }
 	public boolean branchExists(String location, String city) {return dbHandler.branchExists(location, city);}
 	public boolean vehicleTypeExists(String vtname){return dbHandler.vehicleTypeExists(vtname);}
 
-	public String getNameFromLicence(int dLicence) { return dbHandler.getNameFromLicence(dLicence); }
+	public String getNameFromLicence(long dLicence) { return dbHandler.getNameFromLicence(dLicence); }
 
 	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
 		return dbHandler.numberVehiclesAvailable(location, vtname, fromDate, toDate);

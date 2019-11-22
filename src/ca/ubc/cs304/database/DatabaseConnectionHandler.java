@@ -37,28 +37,24 @@ public class DatabaseConnectionHandler {
 
 	public void insertCustomer (CustomerModel customer) {
 	    try {
-	        PreparedStatement ps = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
-	        ps.setLong(1, customer.getCellphone());
-            ps.setString(2, customer.getCname());
-            ps.setString(3, customer.getAddress());
-            ps.setLong(4, customer.getdLicense());
+	    	Statement stmt = connection.createStatement();
+	    	String sql = String.format("INSERT INTO Customer VALUES (%d,%d,\'%s\',\'s\')", customer.getdLicense(), customer.getCellphone(), customer.getCname(), customer.getAddress());
+	       stmt.executeUpdate(sql);
 
-            ps.executeUpdate();
-            connection.commit();
+	       connection.commit();
 
-            ps.close();
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
         }
     }
 
-	public boolean customerExists(int licence) {
+	public boolean customerExists(long licence) {
 		boolean exists = false;
 		int count = 0;
 		try {
 			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Customer WHERE dLicense = ?");
-			ps.setInt(1, licence);
+			ps.setLong(1, licence);
 
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
@@ -153,11 +149,11 @@ public class DatabaseConnectionHandler {
 		return exists;
 	}
 
-	public String getNameFromLicence(int dLicence) {
+	public String getNameFromLicence(long dLicence) {
 		String name = null;
 		try {
 			PreparedStatement ps = connection.prepareStatement("SELECT cname FROM Customer WHERE dLicense = ?");
-			ps.setInt(1, dLicence);
+			ps.setLong(1, dLicence);
 
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
@@ -377,7 +373,11 @@ public class DatabaseConnectionHandler {
 
 				ps.close();
 				System.out.println("You've made a reservation for " + fromDate + " to "
-						+ toDate + ". Your confirmation number is " + confno);
+						+ toDate);
+				if (vtname != null) {
+					System.out.println("Vehicle Type: " + vtname);
+				}
+				System.out.println("Your confirmation number is " + confno);
 			} else {
 				System.out.println("Unable to make reservation. Please try again.");
 			}

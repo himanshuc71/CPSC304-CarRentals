@@ -27,13 +27,13 @@ public interface TerminalTransactionsDelegate {
 
 	public void insertCustomer(CustomerModel customer);
 
-	public boolean customerExists(int dLicence);
+	public boolean customerExists(long dLicence);
 
 	public boolean branchExists(String location, String city);
 
 	public boolean vehicleTypeExists(String vtname);
 
-	public String getNameFromLicence(int dLicence);
+	public String getNameFromLicence(long dLicence);
 
 	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate);
 
