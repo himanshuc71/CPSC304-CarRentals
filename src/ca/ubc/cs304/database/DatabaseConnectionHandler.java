@@ -201,7 +201,7 @@ public class DatabaseConnectionHandler {
 						+ " of license number : " + rental.getvLicense() + " from " +
 						rental.getFromDateTime() + " to " + rental.getToDateTime() + " confirmed.");
 			} else {
-				System.out.println("No reservation was found for the confirmation number: "
+				System.out.println(WARNING_TAG + "No reservation was found for the confirmation number: "
 						+ confNo + " please try again.");
 			}
         } catch (SQLException e) {
@@ -216,6 +216,71 @@ public class DatabaseConnectionHandler {
 
 		// call insert rental with confNo
 	}
+
+	public void insertReturn(ReturnModel returnModel){
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO RETURN VALUES (?,?,?,?,?)");
+            ps.setInt(1, returnModel.getRid());
+            ps.setTimestamp(2, returnModel.getRtnDateTime());
+            ps.setInt(3, returnModel.getOdometer());
+            ps.setInt(4, returnModel.getFullTank());
+            ps.setInt(5, returnModel.getValue());
+            ps.executeUpdate();
+            connection.commit();
+
+            ps.close();
+
+            // make that vehicle available
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT RENTAL.VLICENSE FROM RENTAL WHERE RID = "
+                    + returnModel.getRid());
+            rs.next();
+            String vlicense = rs.getString(1);
+            rs.close();
+            statement.executeQuery("UPDATE VEHICLE SET STATUS = 'available' where VLICENSE = " + "'" + vlicense + "'");
+            connection.commit();
+            statement.close();
+            System.out.println("Vehicle returned with rental id: " + returnModel.getRid() +
+                    " license number: " + vlicense);
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    public int calcValue (int rid, Timestamp rtnDateTime) {
+	    return 0;
+    }
+
+	public boolean checkRentalExists(int rid) {
+	    try {
+            PreparedStatement ps = connection.prepareStatement("SELECT VLICENSE FROM RENTAL WHERE RID = ?");
+            ps.setInt(1, rid);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                return false;
+            }
+            String vlicense = rs.getString(1);
+            rs.close();
+            Statement statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT * FROM VEHICLE WHERE VLICENSE = "
+                    + "'" + vlicense + "'" + " AND STATUS = 'rented'");
+            rs.next();
+            if (rs.next()) {
+                connection.commit();
+                ps.close();
+                return true;
+            } else {
+                connection.commit();
+                ps.close();
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+	    return false;
+    }
 	
 //	public void updateBranch(int id, String name) {
 //		try {

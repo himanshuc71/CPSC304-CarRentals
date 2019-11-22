@@ -5,8 +5,12 @@ import ca.ubc.cs304.delegates.LoginWindowDelegate;
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
 import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
+import ca.ubc.cs304.model.ReturnModel;
 import ca.ubc.cs304.ui.LoginWindow;
 import ca.ubc.cs304.ui.TerminalTransactions;
+import oracle.sql.TIMESTAMP;
+
+import java.sql.Timestamp;
 
 /**
  * This is the main controller class that will orchestrate everything.
@@ -65,6 +69,19 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public void insertRental (String cardName, int cardNo, String expDate) {
 		dbHandler.insertRental(cardName, cardNo, expDate);
 	}
+
+	public boolean checkRentalExists (int rid) {
+	    return dbHandler.checkRentalExists(rid);
+    }
+    public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank){
+        ReturnModel returnModel = new ReturnModel(rid, rtnDateTime, odometer, fullTank, calcValue(rid, rtnDateTime));
+	    dbHandler.insertReturn(returnModel);
+    }
+    public int calcValue(int rid, Timestamp rtnDateTime) {
+	    return dbHandler.calcValue(rid, rtnDateTime);
+    }
+
+
 	
 //	/**
 //	 * TermainalTransactionsDelegate Implementation

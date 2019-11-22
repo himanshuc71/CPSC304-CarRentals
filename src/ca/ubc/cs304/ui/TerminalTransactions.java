@@ -3,6 +3,8 @@ package ca.ubc.cs304.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.SQLOutput;
+import java.sql.Timestamp;
 
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
 import ca.ubc.cs304.model.BranchModel;
@@ -168,7 +170,7 @@ public class TerminalTransactions {
             	String cardName = null;
             	while (cardName == null) {
 					System.out.println("Enter the Credit Card Name: ");
-					cardName = readLine();
+					cardName = readLine().trim();
 					if (cardName != null) {
 						int cardNo = INVALID_INPUT;
 						while (cardNo == INVALID_INPUT) {
@@ -178,7 +180,7 @@ public class TerminalTransactions {
 								String expDate = null;
 								while (expDate == null) {
 									System.out.println("Enter the Credit Card Expiration Date in format mm/yy: ");
-									expDate = readLine();
+									expDate = readLine().trim();
 									if (expDate != null) {
 										delegate.insertRental(confNo, cardName, cardNo, expDate);
 									}
@@ -197,7 +199,40 @@ public class TerminalTransactions {
     }
 
     private void handleReturn(){
-        //TODO
+        int rid = INVALID_INPUT;
+        while (rid == INVALID_INPUT) {
+            System.out.println("Please enter the rental id: ");
+            rid = readInteger(false);
+            if (delegate.checkRentalExists(rid)) {
+                int tankFull = INVALID_INPUT;
+                while (true) {
+                    System.out.println("Enter 1 if the tank was full, 0 otherwise: ");
+                    tankFull = readInteger(false);
+                    if (tankFull == 1 || tankFull == 0) {
+                        break;
+                    }
+                    System.out.println(WARNING_TAG + "You are allowed to enter 1 or 0 only");
+                }
+                int odometer = INVALID_INPUT;
+                while (odometer == INVALID_INPUT) {
+                    System.out.println("Enter odometer value: ");
+                    odometer = readInteger(false);
+                }
+                String rtnDateTime = null;
+                while (rtnDateTime == null) {
+                    System.out.println("Enter return date in format yyyy-mm-dd: ");
+                    rtnDateTime = readLine().trim();
+                }
+                rtnDateTime = rtnDateTime + " " + "00:00:00";
+                Timestamp rtnDateTime_timestamp = Timestamp.valueOf(rtnDateTime);
+
+                delegate.insertReturn(rid, rtnDateTime_timestamp, odometer, tankFull);
+            } else {
+                System.out.println(WARNING_TAG + " No currently rented vehicle with rental id: " + rid + " found");
+            }
+        }
+
+
     }
 
     private void handleDailyRentals() {

@@ -3,6 +3,8 @@ package ca.ubc.cs304.delegates;
 import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
 
+import java.sql.Timestamp;
+
 /**
  * This interface uses the delegation design pattern where instead of having
  * the TerminalTransactions class try to do everything, it will only
@@ -22,6 +24,9 @@ public interface TerminalTransactionsDelegate {
 	public void insertCustomer(CustomerModel customer);
 	public void insertRental(int confNo, String cardName, int cardNo, String expDate);
 	public void insertRental(String cardName, int cardNo, String expDate);
+	public boolean checkRentalExists(int rid);
+	public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank);
+    public int calcValue (int rid, Timestamp rtnDateTime);
 	
 	public void terminalTransactionsFinished();
 }
