@@ -137,12 +137,10 @@ public class TerminalTransactions {
 		toDate = getDate("To");
 
 		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
-		System.out.print("There are " + available + " cars available that fit your input.");
-
+		System.out.println("There are " + available + " cars available that fit your input.");
 	}
 
 	private void makeReservation() {
-        Timestamp fromDate, toDate;
         long dLicense = INVALID_INPUT;
         while (dLicense == INVALID_INPUT) {
             System.out.print("Please enter your Driver's License number: ");
@@ -166,19 +164,25 @@ public class TerminalTransactions {
             System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
             startDate = readLine().trim();
         }
-        System.out.print("End rental on date (YYYY-MM-DD): ");
+		System.out.print("Pickup time (HH:MM): ");
+		String startTime = readLine().trim();
+
+		System.out.print("End rental on date (YYYY-MM-DD): ");
         String endDate = readLine().trim();
         if (!validateDate(endDate)) {
             System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
             endDate = readLine().trim();
         }
-        Timestamp startDateTimestamp = getTimeStampAsString(startDate);
-        Timestamp endDateTimestamp = getTimeStampAsString(endDate);
+		System.out.print("Dropoff time (HH:MM): ");
+		String endTime = readLine().trim();
+
+		Timestamp startDateTimestamp = getTimeStampWithTime(startDate, startTime);
+        Timestamp endDateTimestamp = getTimeStampWithTime(endDate, endTime);
 
         System.out.print("Vehicle Type (Compact, Economy, Mid-size, Standard, Full-size, SUV, Truck): ");
         String vtname = readLine().trim();
-        if (!(delegate.vehicleTypeExists(vtname))) {
-            System.out.print("Invalid vehicle type. Press 1 to re-enter, or 2 to skip: ");
+        while (!(delegate.vehicleTypeExists(vtname))) {
+            System.out.print("Invalid vehicle type. Re-enter, or press 2 to skip: ");
             int choice = readInteger(true);
             switch (choice) {
                 case 1:
@@ -189,7 +193,6 @@ public class TerminalTransactions {
                     break;
                 default:
                     System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
-                    vtname = null;
                     break;
             }
         }
@@ -272,7 +275,9 @@ public class TerminalTransactions {
 					break;
 			}
 		}
-		return getTimeStampAsString(date);
+		System.out.print("At time (HH:MM): ");
+		String time = readLine().trim();
+		return getTimeStampWithTime(date, time);
 	}
 
 	private boolean validateDate(String dateString) {
@@ -289,6 +294,15 @@ public class TerminalTransactions {
 	private Timestamp getTimeStampAsString(String dateString) {
 		try {
 			String date = dateString + " 00:00:00";
+			return Timestamp.valueOf(date);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private Timestamp getTimeStampWithTime(String dateString, String timeString) {
+		try {
+			String date = dateString + " " + timeString + ":00";
 			return Timestamp.valueOf(date);
 		} catch (Exception e) {
 			return null;
