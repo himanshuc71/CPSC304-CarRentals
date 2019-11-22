@@ -198,7 +198,7 @@ public class DatabaseConnectionHandler {
                 s1.close();
 
 				System.out.println("Hi, " + customer.getCname() + " your rented car " + reservation.getVtname()
-						+ " of license number : " + rental.getvLicense() + " from " +
+						+ " of license number : " + rental.getvLicense() + " rental ID: " + rentalId + " from " +
 						rental.getFromDateTime() + " to " + rental.getToDateTime() + " confirmed.");
 			} else {
 				System.out.println(WARNING_TAG + "No reservation was found for the confirmation number: "
@@ -224,7 +224,7 @@ public class DatabaseConnectionHandler {
             ps.setTimestamp(2, returnModel.getRtnDateTime());
             ps.setInt(3, returnModel.getOdometer());
             ps.setInt(4, returnModel.getFullTank());
-            ps.setInt(5, returnModel.getValue());
+            ps.setFloat(5, returnModel.getValue());
             ps.executeUpdate();
             connection.commit();
 
@@ -248,8 +248,39 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public int calcValue (int rid, Timestamp rtnDateTime) {
-	    return 0;
+    public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer) {
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT RENTAL.VLICENSE, RENTAL.FROMDATETIME FROM RENTAL " +
+					"WHERE rid = " + rid);
+			rs.next();
+			String vlicense = rs.getString(1);
+			Timestamp fromDateTime = rs.getTimestamp(2);
+			rs.close();
+			rs = statement.executeQuery("SELECT ODOMETER, VTNAME FROM VEHICLE WHERE " +
+					"VLICENSE = " + "'" + vlicense + "'");
+			rs.next();
+			int kmsCovered = current_odometer - rs.getInt(1);   // reading at return - reading at pick up
+			String vtname = rs.getString(2);
+			rs.close();
+			rs = statement.executeQuery("SELECT * FROM VEHICLETYPE WHERE VTNAME = " + "'" + vtname + "'");
+			rs.next();
+			VehicleType vehicleType = new VehicleType(vtname, rs.getString(2), rs.getInt(3), rs.getInt(4),
+					rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9));
+
+			float numDays = (rtnDateTime.getTime() - fromDateTime.getTime())/(1000*60*60*24);
+			int numWeeks = (int) numDays/7;
+			float numHours = (rtnDateTime.getTime() - fromDateTime.getTime())/(1000*60*60);
+
+			return numWeeks * vehicleType.getwRate() + numDays * vehicleType.getdRate() + numHours * vehicleType.gethRate() +
+					numWeeks * vehicleType.getWiRate() + numDays * vehicleType.getDiRate()
+					+ numHours * vehicleType.getHiRate() + kmsCovered * vehicleType.getkRate();
+
+		} catch (SQLException e){
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return 0;
     }
 
 	public boolean checkRentalExists(int rid) {
@@ -265,7 +296,6 @@ public class DatabaseConnectionHandler {
             Statement statement = connection.createStatement();
             rs = statement.executeQuery("SELECT * FROM VEHICLE WHERE VLICENSE = "
                     + "'" + vlicense + "'" + " AND STATUS = 'rented'");
-            rs.next();
             if (rs.next()) {
                 connection.commit();
                 ps.close();

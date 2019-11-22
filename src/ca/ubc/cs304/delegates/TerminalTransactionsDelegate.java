@@ -26,7 +26,7 @@ public interface TerminalTransactionsDelegate {
 	public void insertRental(String cardName, int cardNo, String expDate);
 	public boolean checkRentalExists(int rid);
 	public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank);
-    public int calcValue (int rid, Timestamp rtnDateTime);
+    public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
 	
 	public void terminalTransactionsFinished();
 }

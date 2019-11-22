@@ -74,11 +74,11 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	    return dbHandler.checkRentalExists(rid);
     }
     public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank){
-        ReturnModel returnModel = new ReturnModel(rid, rtnDateTime, odometer, fullTank, calcValue(rid, rtnDateTime));
+        ReturnModel returnModel = new ReturnModel(rid, rtnDateTime, odometer, fullTank, calcValue(rid, rtnDateTime, odometer));
 	    dbHandler.insertReturn(returnModel);
     }
-    public int calcValue(int rid, Timestamp rtnDateTime) {
-	    return dbHandler.calcValue(rid, rtnDateTime);
+    public float calcValue(int rid, Timestamp rtnDateTime, int current_odometer) {
+	    return dbHandler.calcValue(rid, rtnDateTime, current_odometer);
     }
 
 

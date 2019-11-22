@@ -7,9 +7,9 @@ public class ReturnModel {
     private final Timestamp rtnDateTime;
     private final int odometer;
     private final int fullTank;   // 0 empty; 1 full
-    private final int value;
+    private final float value;
 
-    public ReturnModel(int rid, Timestamp rtnDateTime, int odometer, int fullTank, int value) {
+    public ReturnModel(int rid, Timestamp rtnDateTime, int odometer, int fullTank, float value) {
         this.rid = rid;
         this.rtnDateTime = rtnDateTime;
         this.odometer = odometer;
@@ -33,7 +33,7 @@ public class ReturnModel {
         return fullTank;
     }
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 }
