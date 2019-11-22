@@ -61,6 +61,25 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public void insertCustomer(CustomerModel customer) {
 		dbHandler.insertCustomer(customer);
 	}
+	public boolean customerExists(long dLicence) { return dbHandler.customerExists(dLicence); }
+	public boolean branchExists(String location, String city) {return dbHandler.branchExists(location, city);}
+	public boolean vehicleTypeExists(String vtname){return dbHandler.vehicleTypeExists(vtname);}
+
+	public String getNameFromLicence(long dLicence) { return dbHandler.getNameFromLicence(dLicence); }
+
+	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		return dbHandler.numberVehiclesAvailable(location, vtname, fromDate, toDate);
+	}
+
+	public CustomerModel getCustomer(int licence) { return dbHandler.getCustomer(licence); }
+
+	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate) {
+		dbHandler.makeReservation(dLicence, vtname, fromDate, toDate);
+	}
+
+	public boolean isValidReservation(String location, String vtname, Timestamp startDateTimestamp, Timestamp endDate){
+		return dbHandler.isValidReservation(location, vtname, startDateTimestamp, endDate);
+	}
 
 	public void insertRental (int confNo, String cardName, int cardNo, String expDate) {
 	    dbHandler.insertRental(confNo, cardName, cardNo, expDate);
@@ -73,6 +92,7 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	public boolean checkRentalExists (int rid) {
 	    return dbHandler.checkRentalExists(rid);
     }
+
     public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank){
         ReturnModel returnModel = new ReturnModel(rid, rtnDateTime, odometer, fullTank, calcValue(rid, rtnDateTime, odometer));
 	    dbHandler.insertReturn(returnModel);
@@ -80,8 +100,6 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
     public float calcValue(int rid, Timestamp rtnDateTime, int current_odometer) {
 	    return dbHandler.calcValue(rid, rtnDateTime, current_odometer);
     }
-
-
 	
 //	/**
 //	 * TermainalTransactionsDelegate Implementation

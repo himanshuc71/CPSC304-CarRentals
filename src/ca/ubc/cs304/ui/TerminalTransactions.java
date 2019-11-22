@@ -5,9 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLOutput;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
 import ca.ubc.cs304.model.BranchModel;
+import ca.ubc.cs304.model.CustomerModel;
 
 /**
  * The class is only responsible for handling terminal text inputs. 
@@ -26,20 +31,15 @@ public class TerminalTransactions {
 
 	/**
 	 * Displays simple text interface
-	 */ 
+	 */
 	public void showMainMenu(TerminalTransactionsDelegate delegate) {
 		this.delegate = delegate;
-		
-	    bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+		bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 		int choice = INVALID_INPUT;
-		
-		while (choice != 3) {
+
+		while (choice != 5) {
 			System.out.println();
-//			System.out.println("1. Insert branch");
-//			System.out.println("2. Delete branch");
-//			System.out.println("3. Update branch name");
-//			System.out.println("4. Show branch");
-//			System.out.println("5. Quit");
 			System.out.println("1. If you are a Customer");
 			System.out.println("2. If you are a Clerk");
 			System.out.println("3. Quit");
@@ -51,44 +51,297 @@ public class TerminalTransactions {
 
 			if (choice != INVALID_INPUT) {
 				switch (choice) {
-				case 1:  
-					//handleInsertOption();
-					handleCustomer();
-					break;
-				case 2:  
-					//handleDeleteOption();
-					handleClerk();
-					break;
-				case 3:
-					//handleUpdateOption();
-					handleQuitOption();
-					break;
-//				case 4:
-//					delegate.showBranch();
-//					break;
-//				case 5:
-//					handleQuitOption();
-//					break;
-				default:
-					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
-					break;
+					case 1:
+						handleCustomer();
+						break;
+					case 2:
+						handleClerk();
+						break;
+					case 3:
+						handleQuitOption();
+						break;
+					default:
+						System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+						break;
 				}
 			}
-		}		
+		}
 	}
 
-	private void handleCustomer(){
-	    int dLicense = INVALID_INPUT;
-	    while (dLicense == INVALID_INPUT) {
-            System.out.print("Please enter your Driver's License number: ");
-            dLicense = readInteger(false);
-            // check if customer exists in database if not make a new customer
-			// Customer can view all vehicles, or a subset based on {car type, location, time interval}
-			// when making a reservation see if the customer exists in the database if not make a new customer
-			// by asking info and display the reservation conf no and stuff and PUT the new tuples in the
-			// database
-        }
 
+	private void handleCustomer() {
+		int choice = INVALID_INPUT;
+		while (choice != 5) {
+			System.out.println();
+			System.out.println("1. See cars available");
+			System.out.println("2. Make a reservation");
+			System.out.println("3. Create an account");
+			System.out.println("4. Back");
+			System.out.println("5. Quit");
+			System.out.print("Please choose one of the above 4 options: ");
+			choice = readInteger(false);
+			System.out.println(" ");
+			if (choice != INVALID_INPUT) {
+				switch (choice) {
+					case 1:
+						findNumVehicles();
+						break;
+					case 2:
+						makeReservation();
+						break;
+					case 3:
+						createAccount();
+						break;
+					case 4:
+						showMainMenu(delegate);
+						break;
+					case 5:
+						handleQuitOption();
+						break;
+					default:
+						System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+						break;
+				}
+			}
+		}
+	}
+
+	private CustomerModel createAccount() {
+		long dLicense = INVALID_INPUT, cell = INVALID_INPUT;
+		String name = null, address = null;
+		while (dLicense == INVALID_INPUT) {
+			System.out.print("Please enter your Driver's License number: ");
+			dLicense = readLong(false);
+		}
+		while (delegate.customerExists(dLicense)) {
+			System.out.print("Licence number already exists. Please enter a different licence number: ");
+			dLicense = readLong(false);
+		}
+		System.out.print("Lets create your customer account. Please enter your full name: ");
+		name = readLine().trim();
+		while (cell == INVALID_INPUT) {
+			System.out.print("Cellphone number: ");
+			cell = readLong(false);
+		}
+		System.out.print("Please enter your address: ");
+		address = readLine().trim();
+		CustomerModel customer = new CustomerModel(cell, name, address, dLicense);
+		delegate.insertCustomer(customer);
+		System.out.println();
+		System.out.print("Customer account created");
+		System.out.println();
+		return customer;
+	}
+
+	private void findNumVehicles() {
+		Timestamp fromDate, toDate;
+		System.out.print("Find vehicles available based on the following inputs:");
+		String[] branch = getBranch();
+		String vtname = getType();
+		fromDate = getDate("From");
+		toDate = getDate("To");
+
+		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
+		System.out.println("There are " + available + " cars available that fit your input.");
+	}
+
+	private void makeReservation() {
+		long dLicense = INVALID_INPUT;
+		while (dLicense == INVALID_INPUT) {
+			System.out.print("Please enter your Driver's License number: ");
+			dLicense = readLong(false);
+		}
+		while (!delegate.customerExists(dLicense) && dLicense != 1) {
+			System.out.print("Licence number does not exist. Please enter a licence number attached to an account," +
+					" or type 1 to create an account: ");
+			dLicense = readLong(false);
+		}
+		if (dLicense == 1) {
+			CustomerModel customer = createAccount();
+			dLicense = customer.getdLicense();
+		}
+		String name = delegate.getNameFromLicence(dLicense);
+		System.out.println("Hello " + name + ", make a reservation based on the following inputs");
+
+		System.out.print("Start rental on date (YYYY-MM-DD): ");
+		String startDate = readLine().trim();
+		if (!validateDate(startDate)) {
+			System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
+			startDate = readLine().trim();
+		}
+		String startTime = getTime();
+
+		System.out.print("End rental on date (YYYY-MM-DD): ");
+		String endDate = readLine().trim();
+		if (!validateDate(endDate)) {
+			System.out.print("Invalid date format. Please re-enter rental start date (YYYY-MM-DD): ");
+			endDate = readLine().trim();
+		}
+		String endTime = getTime();
+
+		Timestamp startDateTimestamp = getTimeStampWithTime(startDate, startTime);
+		Timestamp endDateTimestamp = getTimeStampWithTime(endDate, endTime);
+
+		String vtname = getType();
+		if (startDateTimestamp == null || endDateTimestamp == null) {
+			System.out.println("Unable to make a reservation.");
+			handleCustomer();
+		} else {
+			if (delegate.isValidReservation(null, vtname, startDateTimestamp, endDateTimestamp)) {
+				delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
+				handleCustomer();
+			} else {
+				System.out.println("Unable to make a reservation with the dates and/or Vehicle Type entered.");
+				handleCustomer();
+			}
+		}
+	}
+
+	private String[] getBranch() {
+		String location, city;
+		System.out.println();
+		System.out.print("Location: ");
+		location = readLine().trim();
+		System.out.print("City: ");
+		city = readLine().trim();
+		if (!delegate.branchExists(location, city)) {
+			System.out.print("Branch does not exist. Press 1 to enter a different branch or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getBranch();
+					break;
+				case 2:
+					location = null;
+					city = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The input that you entered was not a valid option. Please re-enter: ");
+					location = null;
+					city = null;
+			}
+		}
+		return new String[] {location, city};
+	}
+
+	private String getType() {
+		String vtname;
+		System.out.println();
+		System.out.print("Vehicle Type (Compact, Economy, Mid-size, Standard, Full-size, SUV, Truck): ");
+		vtname = readLine().trim();
+		if (!delegate.vehicleTypeExists(vtname)) {
+			System.out.print("That vehicle type does not exist. Press 1 to enter a different type or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getType();
+					break;
+				case 2:
+					vtname = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					vtname = null;
+					break;
+			}
+		}
+		return vtname;
+	}
+
+	private Timestamp getDate(String dateType) {
+		System.out.print(dateType + " date (YYYY-MM-DD): ");
+		String date = readLine().trim();
+		if (!validateDate(date)) {
+			System.out.print("Invalid date format. Press 1 to enter a different date or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getDate(dateType);
+					break;
+				case 2:
+					date = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					date = null;
+					break;
+			}
+		}
+		System.out.print("At time (HH:MM): ");
+		String time = getTime();
+		return getTimeStampWithTime(date, time);
+	}
+
+	private String getTime() {
+		System.out.print("At time (HH:mm): ");
+		String time = readLine().trim();
+		if (!validateTime(time)) {
+			System.out.print("Invalid time format. Press 1 to enter a different date or 2 to skip: ");
+			int choice = readInteger(true);
+			switch (choice) {
+				case 1:
+					getTime();
+					break;
+				case 2:
+					time = null;
+					break;
+				default:
+					System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+					time = null;
+					break;
+			}
+		}
+		return time;
+	}
+
+
+
+	private boolean validateDate(String dateString) {
+		try {
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+			Date date = format.parse(dateString + " 00:00:00");
+			Timestamp ts = new Timestamp(date.getTime());
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private boolean validateTime(String timeString) {
+		try {
+			Pattern pattern;
+			Matcher matcher;
+			String TIME24HOURS_PATTERN =
+					"([01]?[0-9]|2[0-3]):[0-5][0-9]";
+			pattern = Pattern.compile(TIME24HOURS_PATTERN);
+			matcher = pattern.matcher(timeString);
+			return matcher.matches();
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private Timestamp getTimeStampAsString(String dateString) {
+		try {
+			String date = dateString + " 00:00:00";
+			return Timestamp.valueOf(date);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private Timestamp getTimeStampWithTime(String dateString, String timeString) {
+		try {
+			if (timeString == null) {
+				String date = dateString + " " + "00:00:00";
+				return Timestamp.valueOf(date);
+			} else {
+				String date = dateString + " " + timeString + ":00";
+				return Timestamp.valueOf(date);
+			}
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	private void handleClerk() {
@@ -255,57 +508,6 @@ public class TerminalTransactions {
         showMainMenu(delegate);
     }
 	
-//	private void handleDeleteOption() {
-//		int branchId = INVALID_INPUT;
-//		while (branchId == INVALID_INPUT) {
-//			System.out.print("Please enter the branch ID you wish to delete: ");
-//			branchId = readInteger(false);
-//			if (branchId != INVALID_INPUT) {
-//				delegate.deleteBranch(branchId);
-//			}
-//		}
-//	}
-	
-//	private void handleInsertOption() {
-//		int id = INVALID_INPUT;
-//		while (id == INVALID_INPUT) {
-//			System.out.print("Please enter the branch ID you wish to insert: ");
-//			id = readInteger(false);
-//		}
-//
-//		String name = null;
-//		while (name == null || name.length() <= 0) {
-//			System.out.print("Please enter the branch name you wish to insert: ");
-//			name = readLine().trim();
-//		}
-//
-//		// branch address is allowed to be null so we don't need to repeatedly ask for the address
-//		System.out.print("Please enter the branch address you wish to insert: ");
-//		String address = readLine().trim();
-//		if (address.length() == 0) {
-//			address = null;
-//		}
-//
-//		String city = null;
-//		while (city == null || city.length() <= 0) {
-//			System.out.print("Please enter the branch city you wish to insert: ");
-//			city = readLine().trim();
-//		}
-//
-//		int phoneNumber = INVALID_INPUT;
-//		while (phoneNumber == INVALID_INPUT) {
-//			System.out.print("Please enter the branch phone number you wish to insert: ");
-//			phoneNumber = readInteger(true);
-//		}
-//
-//		BranchModel model = new BranchModel(address,
-//											city,
-//											id,
-//											name,
-//											phoneNumber);
-//		delegate.insertBranch(model);
-//	}
-	
 	private void handleQuitOption() {
 		System.out.println("Good Bye!");
 		
@@ -320,22 +522,6 @@ public class TerminalTransactions {
 		delegate.terminalTransactionsFinished();
 	}
 	
-//	private void handleUpdateOption() {
-//		int id = INVALID_INPUT;
-//		while (id == INVALID_INPUT) {
-//			System.out.print("Please enter the branch ID you wish to update: ");
-//			id = readInteger(false);
-//		}
-//
-//		String name = null;
-//		while (name == null || name.length() <= 0) {
-//			System.out.print("Please enter the branch name you wish to update: ");
-//			name = readLine().trim();
-//		}
-//
-//		delegate.updateBranch(id, name);
-//	}
-	
 	private int readInteger(boolean allowEmpty) {
 		String line = null;
 		int input = INVALID_INPUT;
@@ -349,6 +535,24 @@ public class TerminalTransactions {
 				input = EMPTY_INPUT;
 			} else {
 				System.out.println(WARNING_TAG + " Your input was not an integer");
+			}
+		}
+		return input;
+	}
+
+	private long readLong(boolean allowEmpty) {
+		String line = null;
+		long input = INVALID_INPUT;
+		try {
+			line = bufferedReader.readLine();
+			input = Long.parseLong(line);
+		} catch (IOException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+		} catch (NumberFormatException e) {
+			if (allowEmpty && line.length() == 0) {
+				input = EMPTY_INPUT;
+			} else {
+				System.out.println(WARNING_TAG + " Your input was not an long");
 			}
 		}
 		return input;
