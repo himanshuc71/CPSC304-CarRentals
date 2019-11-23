@@ -137,17 +137,46 @@ public class TerminalTransactions {
 	}
 
 	private void findNumVehicles() {
+		String[] branch;
+		String vtname;
 		Timestamp fromDate, toDate;
-		System.out.print("Find vehicles available based on the following inputs:");
-		String[] branch = getBranch();
-		String vtname = getType();
-		fromDate = getDate("From");
-		toDate = getDate("To");
+		System.out.print("To filter by location, press 1 or press any key to skip: ");
+		int choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				branch = getBranch();
+				break;
+			default:
+				branch = new String[]{null, null};
+				break;
+		}
+		System.out.print("To filter by Vehicle Type, press 1 or press any key to skip: ");
+		choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				vtname = getType();
+				break;
+			default:
+				vtname = null;
+				break;
+		}
+		System.out.print("To filter by date, press 1 or press any key to skip: ");
+		choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				fromDate = getDate("From");
+				toDate = getDate("To");
+				break;
+			default:
+				fromDate = null;
+				toDate = null;
+				break;
+		}
 
 		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
 		System.out.println("\n There are " + available + " cars available that fit your input.\n");
-		System.out.print("To see the details of the vehicles available press 1: ");
-		int choice = readInteger(true);
+		System.out.print("To see the details of the vehicles available press 1, or any key to skip: ");
+		choice = readInteger(true);
 		switch (choice) {
 			case 1:
 				printVehicles(branch[0], vtname, fromDate, toDate);
