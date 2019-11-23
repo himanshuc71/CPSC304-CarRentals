@@ -40,7 +40,6 @@ public interface TerminalTransactionsDelegate {
 	public boolean isValidReservation(String location, String vtname, Timestamp startDateTimestamp, Timestamp endDate);
 
 	public void insertRental(int confNo, String cardName, int cardNo, String expDate);
-	public void insertRental(String cardName, int cardNo, String expDate);
 	public boolean checkRentalExists(int rid);
 	public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank);
     public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);

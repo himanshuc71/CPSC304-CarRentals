@@ -470,13 +470,6 @@ public class DatabaseConnectionHandler {
         }
     }
 
-	// insert rental W/O reservation
-	public void insertRental (String cardName, int cardNo, String expDate) {
-		// make a reservation
-
-		// call insert rental with confNo
-	}
-
 	public void insertReturn(ReturnModel returnModel){
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO RETURN VALUES (?,?,?,?,?)");
