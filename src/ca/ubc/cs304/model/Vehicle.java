@@ -84,4 +84,12 @@ public class Vehicle {
     public int hashCode() {
         return Objects.hash(vLicence);
     }
+
+    @Override
+    public String toString() {
+        return "Vehicle Licence: " + this.vLicence + "\n Make: " + this.make +
+                "\n Model: " + this.model + "\n Year: " + this.year + "\n Color: " + this.color +
+                "\n Vehicle Type: " + this.vtname +  "\n Location: " + this.location +
+                "\n City: " + this.city;
+    }
 }

@@ -11,6 +11,7 @@ import ca.ubc.cs304.ui.TerminalTransactions;
 import oracle.sql.TIMESTAMP;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  * This is the main controller class that will orchestrate everything.
@@ -100,7 +101,15 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
     public float calcValue(int rid, Timestamp rtnDateTime, int current_odometer) {
 	    return dbHandler.calcValue(rid, rtnDateTime, current_odometer);
     }
-	
+
+	public ArrayList getLicenses(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		return dbHandler.getLicenses(location, vtname, fromDate, toDate);
+	}
+
+	public void printVehicles(ArrayList licences){
+		dbHandler.printVehicles(licences);
+	}
+
 //	/**
 //	 * TermainalTransactionsDelegate Implementation
 //	 *

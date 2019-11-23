@@ -4,6 +4,7 @@ import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  * This interface uses the delegation design pattern where instead of having
@@ -38,12 +39,12 @@ public interface TerminalTransactionsDelegate {
 	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate);
 
 	public boolean isValidReservation(String location, String vtname, Timestamp startDateTimestamp, Timestamp endDate);
-
+	public void printVehicles(ArrayList licences);
 	public void insertRental(int confNo, String cardName, int cardNo, String expDate);
 	public void insertRental(String cardName, int cardNo, String expDate);
 	public boolean checkRentalExists(int rid);
 	public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank);
     public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
-	
+	public ArrayList getLicenses(String location, String vtname, Timestamp fromDate, Timestamp toDate);
 	public void terminalTransactionsFinished();
 }

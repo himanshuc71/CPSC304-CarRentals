@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +39,7 @@ public class TerminalTransactions {
 		bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 		int choice = INVALID_INPUT;
 
+		System.out.println("\nMAIN MENU");
 		while (choice != 5) {
 			System.out.println();
 			System.out.println("1. If you are a Customer");
@@ -71,6 +73,7 @@ public class TerminalTransactions {
 
 	private void handleCustomer() {
 		int choice = INVALID_INPUT;
+		System.out.println("CUSTOMER MENU");
 		while (choice != 5) {
 			System.out.println();
 			System.out.println("1. See cars available");
@@ -142,7 +145,23 @@ public class TerminalTransactions {
 		toDate = getDate("To");
 
 		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
-		System.out.println("There are " + available + " cars available that fit your input.");
+		System.out.println("\n There are " + available + " cars available that fit your input.\n");
+		System.out.print("To see the details of the vehicles available press 1: ");
+		int choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				printVehicles(branch[0], vtname, fromDate, toDate);
+				break;
+			default:
+				showMainMenu(delegate);
+				break;
+		}
+	}
+
+	private void printVehicles(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		ArrayList licences = delegate.getLicenses(location, vtname, fromDate, toDate);
+		delegate.printVehicles(licences);
+		showMainMenu(delegate);
 	}
 
 	private void makeReservation() {
