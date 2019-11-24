@@ -631,7 +631,67 @@ public class DatabaseConnectionHandler {
     }
 
     public void generateDailyRentalsByBranch(String date, String location, String city){
+	    try{
+	        Statement statement = connection.createStatement();
+	        String query = "select v.city as Branch_City, " +
+                    "v.location as Branch_Location, " +
+                    "v.vtname as Vehicle_Type, " +
+                    "count(r.rid) as Vehicle_Type_Count " +
+                    "from Vehicle v " +
+                    "inner join Rental r on r.vlicense = v.vlicense " +
+                    "where v.city = '" + city + "' " +
+                    "and v.location = '" + location + "' " +
+                    "and to_date(to_char(r.fromDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = " +
+                    "to_date('" + date + "', 'YYYY-MM-DD') " +
+                    "group by v.city, v.location, v.vtname";
+	        ResultSet rs = statement.executeQuery(query);
 
+            // get info on ResultSet
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+            System.out.println(" ");
+
+            // display column names;
+            for (int i = 0; i < columnsNumber; i++) {
+                // get column name and print it
+                if (i < columnsNumber - 1)
+                    System.out.print(rsmd.getColumnName(i + 1) + "  |  ");
+                else
+                    System.out.print(rsmd.getColumnName(i + 1) + "\n");
+            }
+
+            while (rs.next()) {
+                //Print one row
+                for(int i = 1 ; i <= columnsNumber; i++){
+                    if (i < columnsNumber)
+                        System.out.print(rs.getString(i) + "\t\t\t\t"); //Print one element of a row
+                    else
+                        System.out.print(rs.getString(i) + " "); //Print one element of a row
+                }
+                System.out.println();//Move to the next line to print the next row.
+            }
+            System.out.println(" ");
+            rs.close();
+
+            query = "select v.city as Branch_City, " +
+                    "v.location as Branch_Location, " +
+                    "count(r.rid) as Branch_Total_Count " +
+                    "from Vehicle v " +
+                    "inner join Rental r on r.vlicense = v.vlicense " +
+                    "where to_date(to_char(r.fromDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = " +
+                    "to_date('2019-05-01', 'YYYY-MM-DD') " +
+                    "and v.city = '" + city + "' " +
+                    "and v.location = '" + location + "' " +
+                    "group by v.city, v.location";
+
+            rs = statement.executeQuery(query);
+            rs.next();
+
+            System.out.println("TOTAL RENTALS BY THE BRANCH ON " + date + " : " + rs.getInt(3));
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
     }
 	
 	public boolean login(String username, String password) {

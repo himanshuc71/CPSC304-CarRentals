@@ -505,7 +505,29 @@ public class TerminalTransactions {
     }
 
     private void handleDailyRentalsByBranch() {
-        //TODO
+		String dateForDailyRentals;
+		while (true) {
+			System.out.println("Enter date for daily rentals 'YYYY-MM-DD': ");
+			dateForDailyRentals = readLine().trim();
+			if (validateDate(dateForDailyRentals)) {
+				break;
+			}
+			System.out.println("Invalid date format please try again 'YYYY-MM-DD' ");
+		}
+		String location;
+		String city;
+		while (true) {
+			System.out.println("Enter branch location: ");
+			location = readLine().trim();
+			System.out.println("Enter branch city: ");
+			city = readLine().trim();
+			if (delegate.branchExists(location,city)) {
+				break;
+			}
+			System.out.println("Branch does not exist try again.");
+		}
+
+		delegate.generateDailyRentalsByBranch(dateForDailyRentals, location, city);
     }
 
     private void handleDailyRenturns() {
