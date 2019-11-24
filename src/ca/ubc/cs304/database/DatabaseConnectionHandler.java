@@ -704,6 +704,11 @@ public class DatabaseConnectionHandler {
 				}
 				System.out.println("");
 			}
+
+			rs.close();
+			rs1.close();
+			ps.close();
+			ps1.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
@@ -777,6 +782,12 @@ public class DatabaseConnectionHandler {
 				}
 				System.out.println("");
 			}
+
+			rs.close();
+			rs1.close();
+			ps.close();
+			ps1.close();
+
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
