@@ -661,8 +661,7 @@ public class DatabaseConnectionHandler {
 							"inner join Return rt on rt.rid = r.rid " +
 							"inner join (select rt2.rid, " +
 							"rt2.value, rt2.rtnDateTime from Return rt2) rtB on rtB.rid = r.rid " +
-							"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
-							"group by v.city, v.location, v.vtname, v.vlicense");
+							"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD')");
 			ps.setString(1, date);
 			ResultSet rs = ps.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -683,6 +682,67 @@ public class DatabaseConnectionHandler {
 					"inner join Return rt on rt.rid = r.rid " +
 					"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD')");
 			ps1.setString(1, date);
+			ResultSet rs1 = ps1.executeQuery();
+			ResultSetMetaData rsmd1 = rs1.getMetaData();
+			int columnsNumber1 = rsmd1.getColumnCount();
+			while (rs1.next()) {
+				for (int i = 1; i <= columnsNumber1; i++) {
+					if (i > 1) System.out.print(",  ");
+					String columnValue = rs1.getString(i);
+					System.out.print(rsmd1.getColumnName(i) + ": " + columnValue);
+				}
+				System.out.println("");
+			}
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+	}
+
+	public void printDailyReturnsByBranch(String city, String location, String date){
+		try {
+			PreparedStatement ps1;
+			PreparedStatement ps = connection.prepareStatement("select v.city as Branch_City, " +
+					"v.location as Branch_Location, " +
+					"v.vtname as Vehicle_Type, " +
+					"count(rt.rid) as Return_Count, " +
+					"sum(rt.value) as Revenue " +
+					"from Rental r " +
+					"inner join Vehicle v on v.vlicense = r.vlicense " +
+					"inner join Return rt on rt.rid = r.rid " +
+					"where v.city = ? " +
+					"and v.location = ? " +
+					"and to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
+					"group by v.city, v.location, v.vtname");
+			ps.setString(1, city);
+			ps.setString(2, location);
+			ps.setString(3, date);
+			ResultSet rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnsNumber = rsmd.getColumnCount();
+			while (rs.next()) {
+				for (int i = 1; i <= columnsNumber; i++) {
+					if (i > 1) System.out.print(",  ");
+					String columnValue = rs.getString(i);
+					System.out.print(rsmd.getColumnName(i) + ": " + columnValue);
+				}
+				System.out.println("");
+			}
+			System.out.println();
+			ps1 = connection.prepareStatement("select v.city as Branch_City, " +
+					"v.location as Branch_Location, " +
+					"count(rt.rid) as Return_Count, " +
+					"sum(rt.value) as Revenue " +
+					"from Rental r " +
+					"inner join Vehicle v on v.vlicense = r.vlicense " +
+					"inner join Return rt on rt.rid = r.rid " +
+					"where v.city = ? " +
+					"and v.location = ? " +
+					"and to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
+					"group by v.city, v.location");
+			ps1.setString(1, city);
+			ps1.setString(2, location);
+			ps1.setString(3, date);
 			ResultSet rs1 = ps1.executeQuery();
 			ResultSetMetaData rsmd1 = rs1.getMetaData();
 			int columnsNumber1 = rsmd1.getColumnCount();

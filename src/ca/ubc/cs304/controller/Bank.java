@@ -111,6 +111,8 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	}
 
 	public void printDailyReturns(String date){dbHandler.printDailyReturns(date);}
+	public void printDailyReturnsByBranch(String city, String location, String date){dbHandler.printDailyReturnsByBranch(city,location,date);}
+
 
 
 //	/**

@@ -48,5 +48,7 @@ public interface TerminalTransactionsDelegate {
 	public ArrayList getLicenses(String location, String vtname, Timestamp fromDate, Timestamp toDate);
 	public void terminalTransactionsFinished();
 	public void printDailyReturns(String date);
+	public void printDailyReturnsByBranch(String city, String location, String date);
 
-}
+
+	}

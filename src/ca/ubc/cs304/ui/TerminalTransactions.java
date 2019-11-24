@@ -552,7 +552,14 @@ public class TerminalTransactions {
     }
 
     private void handleDailyReturnsByBranch() {
-        //TODO
+		System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+		String date = readLine().trim();
+		while (!validateDate(date)) {
+			System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+			date = readLine().trim();
+		}
+		String[] branch = getBranch();
+		delegate.printDailyReturnsByBranch(branch[1], branch[0], date);
     }
 
     private void goBackToMainMenu() {
