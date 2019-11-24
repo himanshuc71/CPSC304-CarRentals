@@ -661,20 +661,31 @@ public class DatabaseConnectionHandler {
 							"inner join Return rt on rt.rid = r.rid " +
 							"inner join (select rt2.rid, " +
 							"rt2.value, rt2.rtnDateTime from Return rt2) rtB on rtB.rid = r.rid " +
-							"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD')");
+							"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
+							"group by v.city, v.location, v.vtname, v.vlicense");
 			ps.setString(1, date);
 			ResultSet rs = ps.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnsNumber = rsmd.getColumnCount();
-			while (rs.next()) {
-				for (int i = 1; i <= columnsNumber; i++) {
-					if (i > 1) System.out.print(",  ");
-					String columnValue = rs.getString(i);
-					System.out.print(rsmd.getColumnName(i) + ": " + columnValue);
-				}
-				System.out.println("");
+			// display column names;
+			for (int i = 0; i < columnsNumber; i++) {
+				// get column name and print it
+				if (i < columnsNumber - 1)
+					System.out.print(rsmd.getColumnName(i + 1) + "  |  ");
+				else
+					System.out.print(rsmd.getColumnName(i + 1) + "\n");
 			}
-			System.out.println();
+			while (rs.next()) {
+				//Print one row
+				for (int i = 1; i <= columnsNumber; i++) {
+					if (i < columnsNumber)
+						System.out.print(rs.getString(i) + "\t\t\t\t"); //Print one element of a row
+					else
+						System.out.print(rs.getString(i) + " "); //Print one element of a row
+				}
+				System.out.println();//Move to the next line to print the next row.
+			}
+			System.out.println(" ");
 			ps1 = connection.prepareStatement("select count(rt.rid) as Total_Count, " +
 					"sum(rt.value) as Total_Revenue " +
 					"from Rental r " +
@@ -719,16 +730,28 @@ public class DatabaseConnectionHandler {
 			ps.setString(3, date);
 			ResultSet rs = ps.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
+
 			int columnsNumber = rsmd.getColumnCount();
-			while (rs.next()) {
-				for (int i = 1; i <= columnsNumber; i++) {
-					if (i > 1) System.out.print(",  ");
-					String columnValue = rs.getString(i);
-					System.out.print(rsmd.getColumnName(i) + ": " + columnValue);
-				}
-				System.out.println("");
+			// display column names;
+			for (int i = 0; i < columnsNumber; i++) {
+				// get column name and print it
+				if (i < columnsNumber - 1)
+					System.out.print(rsmd.getColumnName(i + 1) + "  |  ");
+				else
+					System.out.print(rsmd.getColumnName(i + 1) + "\n");
 			}
-			System.out.println();
+			while (rs.next()) {
+				//Print one row
+				for (int i = 1; i <= columnsNumber; i++) {
+					if (i < columnsNumber)
+						System.out.print(rs.getString(i) + "\t\t\t\t"); //Print one element of a row
+					else
+						System.out.print(rs.getString(i) + " "); //Print one element of a row
+				}
+				System.out.println();//Move to the next line to print the next row.
+			}
+			System.out.println(" ");
+
 			ps1 = connection.prepareStatement("select v.city as Branch_City, " +
 					"v.location as Branch_Location, " +
 					"count(rt.rid) as Return_Count, " +
