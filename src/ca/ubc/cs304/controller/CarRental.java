@@ -13,11 +13,11 @@ import java.util.ArrayList;
 /**
  * This is the main controller class that will orchestrate everything.
  */
-public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
+public class CarRental implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	private DatabaseConnectionHandler dbHandler = null;
 	private LoginWindow loginWindow = null;
 
-	public Bank() {
+	public CarRental() {
 		dbHandler = new DatabaseConnectionHandler();
 	}
 	
@@ -88,10 +88,10 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
     }
 
     public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank){
-        ReturnModel returnModel = new ReturnModel(rid, rtnDateTime, odometer, fullTank, calcValue(rid, rtnDateTime, odometer));
-	    dbHandler.insertReturn(returnModel);
+        ReturnModel returnModel = new ReturnModel(rid, rtnDateTime, odometer, fullTank, Float.parseFloat(calcValue(rid, rtnDateTime, odometer)[1]));
+	    dbHandler.insertReturn(returnModel, calcValue(rid, rtnDateTime, odometer)[0]);
     }
-    public float calcValue(int rid, Timestamp rtnDateTime, int current_odometer) {
+    public String[] calcValue(int rid, Timestamp rtnDateTime, int current_odometer) {
 	    return dbHandler.calcValue(rid, rtnDateTime, current_odometer);
     }
 
@@ -132,7 +132,7 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	 * Main method called at launch time
 	 */
 	public static void main(String args[]) {
-		Bank bank = new Bank();
-		bank.start();
+		CarRental carRental = new CarRental();
+		carRental.start();
 	}
 }

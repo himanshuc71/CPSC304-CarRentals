@@ -41,7 +41,7 @@ public interface TerminalTransactionsDelegate {
 
 	public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank);
 
-	public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
+	public String[] calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
 
     public void generateDailyRentals(String date);
 

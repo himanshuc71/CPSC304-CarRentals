@@ -524,9 +524,12 @@ public class TerminalTransactions {
                     odometer = readInteger(false);
                 }
                 String rtnDateTime = null;
-                while (rtnDateTime == null) {
+                while (true) {
                     System.out.println("Enter return date in format yyyy-mm-dd: ");
                     rtnDateTime = readLine().trim();
+                    if (validateDate(rtnDateTime))
+                        break;
+                    System.out.println("Please enter a valid date format.");
                 }
                 rtnDateTime = rtnDateTime + " " + "00:00:00";
                 Timestamp rtnDateTime_timestamp = Timestamp.valueOf(rtnDateTime);

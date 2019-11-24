@@ -531,9 +531,16 @@ public class DatabaseConnectionHandler {
                 s.close();
                 s1.close();
 
-				System.out.println("Hi, " + customer.getCname() + " your rented car " + reservation.getVtname()
-						+ " of license number : " + rental.getvLicense() + " rental ID: " + rentalId + " from " +
-						rental.getFromDateTime() + " to " + rental.getToDateTime() + " confirmed.");
+				System.out.println("");
+				System.out.println("Dear " + customer.getCname() + ",\n" +
+						"Detail's about your rental:\n" +
+						"License number: " + rental.getvLicense() + "\n" +
+						"Rental ID: " + rentalId + "\n" +
+						"Car: " + vehicle.getMake() + " " + vehicle.getModel() + "\n" +
+						"Color: " + vehicle.getColor() + "\n" +
+						"Dates: " + rental.getFromDateTime() + " to \n" +
+						rental.getToDateTime() +
+						"\n\nThank you!.");
 			} else {
 				System.out.println(WARNING_TAG + "No reservation was found for the confirmation number: "
 						+ confNo + " please try again.");
@@ -544,7 +551,7 @@ public class DatabaseConnectionHandler {
         }
     }
 
-	public void insertReturn(ReturnModel returnModel){
+	public void insertReturn(ReturnModel returnModel, String total_string){
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO RETURN VALUES (?,?,?,?,?)");
             ps.setInt(1, returnModel.getRid());
@@ -559,24 +566,46 @@ public class DatabaseConnectionHandler {
 
             // make that vehicle available
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT RENTAL.VLICENSE FROM RENTAL WHERE RID = "
+            ResultSet rs = statement.executeQuery("SELECT RENTAL.VLICENSE, RENTAL.DLICENSE, RENTAL.FROMDATETIME " +
+					"FROM RENTAL WHERE RID = "
                     + returnModel.getRid());
             rs.next();
             String vlicense = rs.getString(1);
+            Long dlicense = rs.getLong(2);
+            String fromDate = rs.getString(3);
+            rs.close();
+            rs = statement.executeQuery("SELECT * FROM CUSTOMER WHERE DLICENSE = " + dlicense);
+            rs.next();
+            CustomerModel customer = new CustomerModel(rs.getLong(2),rs.getString(3), rs.getString(4), rs.getLong(1));
+            rs.close();
+            rs = statement.executeQuery("SELECT * FROM VEHICLE WHERE VLICENSE = " + "'" + vlicense + "'");
+            rs.next();
+            Vehicle vehicle = new Vehicle(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
+					rs.getString(5), rs.getInt(6), rs.getString(7), rs.getString(8), rs.getString(9),
+					rs.getString(10));
             rs.close();
             statement.executeQuery("UPDATE VEHICLE SET STATUS = 'available', ODOMETER = ODOMETER + " + returnModel.getOdometer() +
                     " where VLICENSE = " + "'" + vlicense + "'");
             connection.commit();
             statement.close();
-            System.out.println("Vehicle returned with rental id: " + returnModel.getRid() +
-                    " license number: " + vlicense);
+			System.out.println(" ");
+            System.out.println("Dear " + customer.getCname() + ",\n" +
+					"Rental Receipt: \n" +
+					"License Number: " + vehicle.getvLicence() +"\n" +
+					"Rental ID: " + returnModel.getRid() + "\n" +
+					"Car: " + vehicle.getMake() + " " + vehicle.getModel() + "\n" +
+					"Color: " + vehicle.getColor() + "\n" +
+					"Dates: " + fromDate + " to \n" +
+					returnModel.getRtnDateTime() + "\n\n" +
+					"TOTAL: " + total_string + " = $" + returnModel.getValue() + "\n\n" +
+					"Thank you for renting with us.");
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
         }
     }
 
-    public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer) {
+    public String[] calcValue (int rid, Timestamp rtnDateTime, int current_odometer) {
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT RENTAL.VLICENSE, RENTAL.FROMDATETIME FROM RENTAL " +
@@ -599,16 +628,24 @@ public class DatabaseConnectionHandler {
 			float numDays = (rtnDateTime.getTime() - fromDateTime.getTime())/(1000*60*60*24);
 			int numWeeks = (int) numDays/7;
 			float numHours = (rtnDateTime.getTime() - fromDateTime.getTime())/(1000*60*60);
-
-			return numWeeks * vehicleType.getwRate() + numDays * vehicleType.getdRate() + numHours * vehicleType.gethRate() +
+			float value = numWeeks * vehicleType.getwRate() + numDays * vehicleType.getdRate() + numHours * vehicleType.gethRate() +
 					numWeeks * vehicleType.getWiRate() + numDays * vehicleType.getDiRate()
 					+ numHours * vehicleType.getHiRate() + kmsCovered * vehicleType.getkRate();
+			String total_value = "Number of weeks * weekly rate + number of days * daily rate + number of hours * hourly rate + \n" +
+					"number of weeks * weekly insurance rate + number of days * daily insurance rate + \n" +
+					"number of hours * hourly insurance rate + Kilometers covered * per km rate = \n" +
+					numWeeks + " * " + vehicleType.getwRate() + " + " + numDays + " * " + vehicleType.getdRate() + " + " +
+					numHours + " * " + vehicleType.gethRate() + " + " + numWeeks + " * " + vehicleType.getWiRate() + " + " +
+					numDays + " * " + vehicleType.getDiRate() + " + " + numHours + " * " + vehicleType.getHiRate() + " + " +
+					kmsCovered + " * " + vehicleType.getkRate();
+
+			return new String[]{total_value, String.valueOf(value)};
 
 		} catch (SQLException e){
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
 		}
-		return 0;
+		return new String[] {"", "0"};
     }
 
 	public boolean checkRentalExists(int rid) {
