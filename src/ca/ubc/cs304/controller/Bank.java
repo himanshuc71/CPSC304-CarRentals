@@ -8,6 +8,7 @@ import ca.ubc.cs304.model.ReturnModel;
 import ca.ubc.cs304.ui.LoginWindow;
 import ca.ubc.cs304.ui.TerminalTransactions;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  * This is the main controller class that will orchestrate everything.
@@ -101,8 +102,20 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
     public void generateDailyRentalsByBranch(String date, String location, String city){
         dbHandler.generateDailyRentalsByBranch(date, location, city);
     }
-	
-    /**
+
+	public void printDailyReturns(String date){dbHandler.printDailyReturns(date);}
+
+	public void printDailyReturnsByBranch(String city, String location, String date){dbHandler.printDailyReturnsByBranch(city,location,date);}
+
+	public void printVehicles(ArrayList licences){
+		dbHandler.printVehicles(licences);
+	}
+
+	public ArrayList getLicenses(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		return dbHandler.getLicenses(location, vtname, fromDate, toDate);
+	}
+
+	/**
 	 * TerminalTransactionsDelegate Implementation
 	 * 
      * The TerminalTransaction instance tells us that it is done with what it's 

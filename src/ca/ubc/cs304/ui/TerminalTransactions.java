@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +39,7 @@ public class TerminalTransactions {
 		bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 		int choice = INVALID_INPUT;
 
+		System.out.println("\nMAIN MENU");
 		while (choice != 5) {
 			System.out.println();
 			System.out.println("1. If you are a Customer");
@@ -71,6 +73,7 @@ public class TerminalTransactions {
 
 	private void handleCustomer() {
 		int choice = INVALID_INPUT;
+		System.out.println("CUSTOMER MENU");
 		while (choice != 5) {
 			System.out.println();
 			System.out.println("1. See cars available");
@@ -134,16 +137,62 @@ public class TerminalTransactions {
 	}
 
 	private void findNumVehicles() {
+		String[] branch;
+		String vtname;
 		Timestamp fromDate, toDate;
-		System.out.print("Find vehicles available based on the following inputs:");
-		String[] branch = getBranch();
-		String vtname = getType();
-		fromDate = getDate("From");
-		toDate = getDate("To");
+		System.out.print("To filter by location, press 1 or press any key to skip: ");
+		int choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				branch = getBranch();
+				break;
+			default:
+				branch = new String[]{null, null};
+				break;
+		}
+		System.out.print("To filter by Vehicle Type, press 1 or press any key to skip: ");
+		choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				vtname = getType();
+				break;
+			default:
+				vtname = null;
+				break;
+		}
+		System.out.print("To filter by date, press 1 or press any key to skip: ");
+		choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				fromDate = getDate("From");
+				toDate = getDate("To");
+				break;
+			default:
+				fromDate = null;
+				toDate = null;
+				break;
+		}
 
 		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
-		System.out.println("There are " + available + " cars available that fit your input.");
+		System.out.println("\n There are " + available + " cars available that fit your input.\n");
+		System.out.print("To see the details of the vehicles available press 1, or any key to skip: ");
+		choice = readInteger(true);
+		switch (choice) {
+			case 1:
+				printVehicles(branch[0], vtname, fromDate, toDate);
+				break;
+			default:
+				showMainMenu(delegate);
+				break;
+		}
 	}
+
+	private void printVehicles(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		ArrayList licences = delegate.getLicenses(location, vtname, fromDate, toDate);
+		delegate.printVehicles(licences);
+		showMainMenu(delegate);
+	}
+
 
 	private void makeReservation(String whoCalled) {
 		long dLicense = INVALID_INPUT;
@@ -383,10 +432,10 @@ public class TerminalTransactions {
                         handleDailyRentalsByBranch();
 					    break;
 				    case 5:
-                        handleDailyRenturns();
+                        handleDailyReturns();
 					    break;
                     case 6:
-                        handleDailyRenturnsByBranch();
+                        handleDailyReturnsByBranch();
                         break;
                     case 7:
                         goBackToMainMenu();
@@ -530,13 +579,26 @@ public class TerminalTransactions {
 		delegate.generateDailyRentalsByBranch(dateForDailyRentals, location, city);
     }
 
-    private void handleDailyRenturns() {
-        //TODO
-    }
+	private void handleDailyReturns() {
+		System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+		String date = readLine().trim();
+		while (!validateDate(date)) {
+			System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+			date = readLine().trim();
+		}
+		delegate.printDailyReturns(date);
+	}
 
-    private void handleDailyRenturnsByBranch() {
-        //TODO
-    }
+	private void handleDailyReturnsByBranch() {
+		System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+		String date = readLine().trim();
+		while (!validateDate(date)) {
+			System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+			date = readLine().trim();
+		}
+		String[] branch = getBranch();
+		delegate.printDailyReturnsByBranch(branch[1], branch[0], date);
+	}
 
     private void goBackToMainMenu() {
         showMainMenu(delegate);
