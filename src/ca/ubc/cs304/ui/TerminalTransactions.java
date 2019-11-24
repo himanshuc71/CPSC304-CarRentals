@@ -89,7 +89,7 @@ public class TerminalTransactions {
 						findNumVehicles();
 						break;
 					case 2:
-						makeReservation();
+						makeReservation("Customer");
 						break;
 					case 3:
 						createAccount();
@@ -192,7 +192,7 @@ public class TerminalTransactions {
 		showMainMenu(delegate);
 	}
 
-	private void makeReservation() {
+	private void makeReservation(String whoCalled) {
 		long dLicense = INVALID_INPUT;
 		while (dLicense == INVALID_INPUT) {
 			System.out.print("Please enter your Driver's License number: ");
@@ -232,14 +232,17 @@ public class TerminalTransactions {
 		String vtname = getType();
 		if (startDateTimestamp == null || endDateTimestamp == null) {
 			System.out.println("Unable to make a reservation.");
-			handleCustomer();
+			if (whoCalled.equals("Customer"))
+				handleCustomer();
 		} else {
 			if (delegate.isValidReservation(null, vtname, startDateTimestamp, endDateTimestamp)) {
 				delegate.makeReservation(dLicense, vtname, startDateTimestamp, endDateTimestamp);
-				handleCustomer();
+				if (whoCalled.equals("Customer"))
+					handleCustomer();
 			} else {
 				System.out.println("Unable to make a reservation with the dates and/or Vehicle Type entered.");
-				handleCustomer();
+				if (whoCalled.equals("Customer"))
+					handleCustomer();
 			}
 		}
 	}
