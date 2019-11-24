@@ -1,5 +1,6 @@
 package ca.ubc.cs304.database;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -168,32 +169,66 @@ public class DatabaseConnectionHandler {
 		return name;
 	}
 
-	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate){
+		return getLicenses(location, vtname, fromDate, toDate).size();
+	}
+
+	public void printVehicles(ArrayList licences) {
+		ArrayList vehicles = new java.util.ArrayList<Vehicle>();
+		licences.forEach((licence) -> vehicles.add(getVehicleFromLicence((String) licence)));
+		vehicles.forEach((vehicle) -> System.out.println("\n" + vehicle.toString()+ "\n"));
+	}
+
+	private Vehicle getVehicleFromLicence(String licence) {
+		java.util.ArrayList alRowData = new java.util.ArrayList();
+		try {
+			PreparedStatement ps = connection.prepareStatement("SELECT * FROM Vehicle WHERE vlicense = ?");
+			ps.setString(1, licence);
+
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					alRowData.add(rs.getObject(columnIndex));
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+		return new Vehicle(alRowData.get(0).toString(), alRowData.get(1).toString(), alRowData.get(2).toString(),alRowData.get(3).toString(),
+				alRowData.get(4).toString(), ((BigDecimal)alRowData.get(5)).intValue(),alRowData.get(6).toString(),alRowData.get(7).toString(),alRowData.get(8).toString(),
+				alRowData.get(9).toString());
+	}
+
+	public ArrayList getLicenses(String location, String vtname, Timestamp fromDate, Timestamp toDate) {
+		ArrayList vlicenses = new java.util.ArrayList();
 		if (location == null && vtname == null && (fromDate != null && toDate != null)) {
-			return numberVehiclesAvailableDates(fromDate, toDate);
+			vlicenses = numberVehiclesAvailableDates(fromDate, toDate);
 		} else if (location != null && vtname == null && (fromDate == null || toDate == null)) {
-			return numberVehiclesAvailableLocation(location);
+			vlicenses = numberVehiclesAvailableLocation(location);
 		} else if (location == null && vtname != null && (fromDate == null || toDate == null)) {
-			return numberVehiclesAvailableVTname(vtname);
+			vlicenses = numberVehiclesAvailableVTname(vtname);
 		} else if (location != null && vtname != null && (fromDate == null || toDate == null)) {
-			return numberVehiclesAvailableLocationVTname(location, vtname);
+			vlicenses = numberVehiclesAvailableLocationVTname(location, vtname);
 		} else if (location != null && vtname == null) {
-			return numberVehiclesAvailableLocationDates(location, fromDate, toDate);
+			vlicenses = numberVehiclesAvailableLocationDates(location, fromDate, toDate);
 		} else if (location == null && vtname != null) {
-			return numberVehiclesAvailableVTnameDates(vtname, fromDate, toDate);
+			vlicenses = numberVehiclesAvailableVTnameDates(vtname, fromDate, toDate);
 		} else {
 			int numberOfRows = 0;
 			try {
 				// need to have different cases if any of the inputs are blank
 				// using available status
 				// check the rental table, reservation, vehicle and vehicle type
-				PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM (SELECT v.vlicense " +
+				PreparedStatement ps = connection.prepareStatement("SELECT v.vlicense " +
 						"FROM Vehicle v WHERE v.status = 'available' AND v.location = ? AND v.vtname = ? " +
 						"MINUS " +
 						"SELECT r.vlicense " +
 						"FROM Rental r " +
 						"WHERE r.fromDateTime BETWEEN ? and ? " +
-						"OR r.toDateTime BETWEEN ? and ?)");
+						"OR r.toDateTime BETWEEN ? and ?");
 				ps.setString(1, location);
 				ps.setString(2, vtname);
 				ps.setTimestamp(3, fromDate);
@@ -202,84 +237,108 @@ public class DatabaseConnectionHandler {
 				ps.setTimestamp(6, toDate);
 
 				ResultSet rs = ps.executeQuery();
-				if (rs.next()) {
-					numberOfRows = rs.getInt(1);
+				while (rs.next()) {
+					java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+					int numberOfColumns = rsmd.getColumnCount();
+					for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+						vlicenses.add(rs.getObject(columnIndex));
+					}
 				}
 				connection.commit();
 				ps.close();
 			} catch (SQLException e) {
 				System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 				rollbackConnection();
+				vlicenses = null;
 			}
-			return numberOfRows;
 		}
+		return vlicenses;
 	}
 
-	private int numberVehiclesAvailableLocation(String location) {
-		int numberOfRows = 0;
+	private ArrayList numberVehiclesAvailableLocation(String location) {
+		java.util.ArrayList vlicenses = new java.util.ArrayList();
+		// int numberOfRows = 0;
 		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Vehicle v WHERE location = ? AND status = 'available'");
+			PreparedStatement ps = connection.prepareStatement("SELECT vlicense FROM Vehicle v WHERE location = ? AND status = 'available'");
 			ps.setString(1, location);
 
+
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				numberOfRows = rs.getInt(1);
+			while (rs.next()) {
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					vlicenses.add(rs.getObject(columnIndex));
+				}
 			}
 			connection.commit();
 			ps.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
+			vlicenses = null;
 		}
-		return numberOfRows;
+		return vlicenses;
 	}
 
-	private int numberVehiclesAvailableVTname(String vtname) {
-		int numberOfRows = 0;
+	private ArrayList numberVehiclesAvailableVTname(String vtname) {
+		java.util.ArrayList vlicenses = new java.util.ArrayList();
 		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Vehicle v WHERE vtname = ? AND status = 'available'");
+			PreparedStatement ps = connection.prepareStatement("SELECT vlicense FROM Vehicle v WHERE vtname = ? AND status = 'available'");
 			ps.setString(1, vtname);
 
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				numberOfRows = rs.getInt(1);
+			while (rs.next()) {
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					vlicenses.add(rs.getObject(columnIndex));
+				}
 			}
 			connection.commit();
 			ps.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
+			vlicenses = null;
 		}
-		return numberOfRows;
+		return vlicenses;
 	}
 
-	private int numberVehiclesAvailableLocationVTname(String location, String vtname) {
-		int numberOfRows = 0;
+	private ArrayList numberVehiclesAvailableLocationVTname(String location, String vtname) {
+		ArrayList vlicenses = new java.util.ArrayList();
 		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Vehicle v WHERE location = ? AND vtname = ? AND status = 'available'");
+			PreparedStatement ps = connection.prepareStatement("SELECT vlicense FROM Vehicle v WHERE location = ? AND vtname = ? AND status = 'available'");
 			ps.setString(1, location);
 			ps.setString(2, vtname);
 
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				numberOfRows = rs.getInt(1);
+			while (rs.next()) {
+				java.util.ArrayList alRowData = new java.util.ArrayList();
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					alRowData.add(rs.getObject(columnIndex));
+				}
+				vlicenses = alRowData;
 			}
 			connection.commit();
 			ps.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
+			vlicenses = null;
 		}
-		return numberOfRows;
+		return vlicenses;
 	}
 
-	private int numberVehiclesAvailableDates(Timestamp fromDate, Timestamp toDate) {
-		int numberOfRows = 0;
+	private ArrayList numberVehiclesAvailableDates(Timestamp fromDate, Timestamp toDate) {
+		ArrayList vlicenses = new java.util.ArrayList();
 		try {
-			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' " +
+			String getLicenceRental = "SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' " +
 					"MINUS SELECT r.vlicense FROM Rental r WHERE r.fromDateTime " +
 					"BETWEEN ? and ? OR r.toDateTime " +
-					"BETWEEN ? and ?)";
+					"BETWEEN ? and ?";
 			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
 			ps.setTimestamp(1, fromDate);
 			ps.setTimestamp(2, toDate);
@@ -287,25 +346,30 @@ public class DatabaseConnectionHandler {
 			ps.setTimestamp(4, toDate);
 
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				numberOfRows = rs.getInt(1);
+			while (rs.next()) {
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					vlicenses.add(rs.getObject(columnIndex));
+				}
 			}
 			connection.commit();
 			ps.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
+			vlicenses = null;
 		}
-		return numberOfRows;
+		return vlicenses;
 	}
 
-	private int numberVehiclesAvailableLocationDates(String location, Timestamp fromDate, Timestamp toDate) {
-		int numberOfRows = 0;
+	private ArrayList numberVehiclesAvailableLocationDates(String location, Timestamp fromDate, Timestamp toDate) {
+		ArrayList vlicenses = new java.util.ArrayList();
 		try {
-			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.location = ? " +
+			String getLicenceRental = "SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.location = ? " +
 					"MINUS SELECT r.vlicense FROM Rental r WHERE r.fromDateTime " +
 					"BETWEEN ? and ? OR r.toDateTime " +
-					"BETWEEN ? and ?)";
+					"BETWEEN ? and ?";
 			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
 			ps.setString(1, location);
 			ps.setTimestamp(2, fromDate);
@@ -314,25 +378,30 @@ public class DatabaseConnectionHandler {
 			ps.setTimestamp(5, toDate);
 
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				numberOfRows = rs.getInt(1);
+			while (rs.next()) {
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					vlicenses.add(rs.getObject(columnIndex));
+				}
 			}
 			connection.commit();
 			ps.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
+			vlicenses = null;
 		}
-		return numberOfRows;
+		return vlicenses;
 	}
 
-	private int numberVehiclesAvailableVTnameDates(String vtname, Timestamp fromDate, Timestamp toDate) {
-		int numberOfRows = 0;
+	private ArrayList numberVehiclesAvailableVTnameDates(String vtname, Timestamp fromDate, Timestamp toDate) {
+		ArrayList vlicenses = new java.util.ArrayList();
 		try {
-			String getLicenceRental = "SELECT COUNT(*) FROM (SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.vtname = ? " +
+			String getLicenceRental = "SELECT v.vlicense FROM Vehicle v WHERE v.status = 'available' AND v.vtname = ? " +
 					"MINUS SELECT r.vlicense FROM Rental r WHERE r.fromDateTime " +
 					"BETWEEN ? and ? OR r.toDateTime " +
-					"BETWEEN ? and ?)";
+					"BETWEEN ? and ?";
 			PreparedStatement ps = connection.prepareStatement(getLicenceRental);
 			ps.setString(1, vtname);
 			ps.setTimestamp(2, fromDate);
@@ -341,16 +410,21 @@ public class DatabaseConnectionHandler {
 			ps.setTimestamp(5, toDate);
 
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				numberOfRows = rs.getInt(1);
+			while (rs.next()) {
+				java.sql.ResultSetMetaData rsmd = rs.getMetaData();
+				int numberOfColumns = rsmd.getColumnCount();
+				for(int columnIndex = 1; columnIndex <= numberOfColumns; columnIndex ++){
+					vlicenses.add(rs.getObject(columnIndex));
+				}
 			}
 			connection.commit();
 			ps.close();
 		} catch (SQLException e) {
 			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
 			rollbackConnection();
+			vlicenses = null;
 		}
-		return numberOfRows;
+		return vlicenses;
 	}
 
 	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate) {
@@ -693,6 +767,154 @@ public class DatabaseConnectionHandler {
             rollbackConnection();
         }
     }
+
+	public void printDailyReturns(String date){
+		try {
+			PreparedStatement ps1;
+			PreparedStatement ps = connection.prepareStatement("select v.city as Branch_City, " +
+					"v.location as Branch_Location, " +
+					"count(rtB.rid) as Branch_Count," +
+					"sum(rtB.value) as Branch_Revenue, " +
+					"v.vtname as Vehicle_Type, " +
+					"count(rt.rid) as Return_Count, " +
+					"sum(rt.value) as Return_Revenue " +
+					"from Rental r " +
+					"inner join Vehicle v on r.vlicense = v.vlicense " +
+					"inner join Return rt on rt.rid = r.rid " +
+					"inner join (select rt2.rid, " +
+					"rt2.value, rt2.rtnDateTime from Return rt2) rtB on rtB.rid = r.rid " +
+					"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
+					"group by v.city, v.location, v.vtname, v.vlicense");
+			ps.setString(1, date);
+			ResultSet rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnsNumber = rsmd.getColumnCount();
+			// display column names;
+			for (int i = 0; i < columnsNumber; i++) {
+				// get column name and print it
+				if (i < columnsNumber - 1)
+					System.out.print(rsmd.getColumnName(i + 1) + "  |  ");
+				else
+					System.out.print(rsmd.getColumnName(i + 1) + "\n");
+			}
+			while (rs.next()) {
+				//Print one row
+				for (int i = 1; i <= columnsNumber; i++) {
+					if (i < columnsNumber)
+						System.out.print(rs.getString(i) + "\t\t\t\t"); //Print one element of a row
+					else
+						System.out.print(rs.getString(i) + " "); //Print one element of a row
+				}
+				System.out.println();//Move to the next line to print the next row.
+			}
+			System.out.println(" ");
+			ps1 = connection.prepareStatement("select count(rt.rid) as Total_Count, " +
+					"sum(rt.value) as Total_Revenue " +
+					"from Rental r " +
+					"inner join Vehicle v on v.vlicense = r.vlicense " +
+					"inner join Return rt on rt.rid = r.rid " +
+					"where to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD')");
+			ps1.setString(1, date);
+			ResultSet rs1 = ps1.executeQuery();
+			ResultSetMetaData rsmd1 = rs1.getMetaData();
+			int columnsNumber1 = rsmd1.getColumnCount();
+			while (rs1.next()) {
+				for (int i = 1; i <= columnsNumber1; i++) {
+					if (i > 1) System.out.print(",  ");
+					String columnValue = rs1.getString(i);
+					System.out.print(rsmd1.getColumnName(i) + ": " + columnValue);
+				}
+				System.out.println("");
+			}
+
+			rs.close();
+			rs1.close();
+			ps.close();
+			ps1.close();
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+	}
+
+	public void printDailyReturnsByBranch(String city, String location, String date){
+		try {
+			PreparedStatement ps1;
+			PreparedStatement ps = connection.prepareStatement("select v.city as Branch_City, " +
+					"v.location as Branch_Location, " +
+					"v.vtname as Vehicle_Type, " +
+					"count(rt.rid) as Return_Count, " +
+					"sum(rt.value) as Revenue " +
+					"from Rental r " +
+					"inner join Vehicle v on v.vlicense = r.vlicense " +
+					"inner join Return rt on rt.rid = r.rid " +
+					"where v.city = ? " +
+					"and v.location = ? " +
+					"and to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
+					"group by v.city, v.location, v.vtname");
+			ps.setString(1, city);
+			ps.setString(2, location);
+			ps.setString(3, date);
+			ResultSet rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+
+			int columnsNumber = rsmd.getColumnCount();
+			// display column names;
+			for (int i = 0; i < columnsNumber; i++) {
+				// get column name and print it
+				if (i < columnsNumber - 1)
+					System.out.print(rsmd.getColumnName(i + 1) + "  |  ");
+				else
+					System.out.print(rsmd.getColumnName(i + 1) + "\n");
+			}
+			while (rs.next()) {
+				//Print one row
+				for (int i = 1; i <= columnsNumber; i++) {
+					if (i < columnsNumber)
+						System.out.print(rs.getString(i) + "\t\t\t\t"); //Print one element of a row
+					else
+						System.out.print(rs.getString(i) + " "); //Print one element of a row
+				}
+				System.out.println();//Move to the next line to print the next row.
+			}
+			System.out.println(" ");
+
+			ps1 = connection.prepareStatement("select v.city as Branch_City, " +
+					"v.location as Branch_Location, " +
+					"count(rt.rid) as Return_Count, " +
+					"sum(rt.value) as Revenue " +
+					"from Rental r " +
+					"inner join Vehicle v on v.vlicense = r.vlicense " +
+					"inner join Return rt on rt.rid = r.rid " +
+					"where v.city = ? " +
+					"and v.location = ? " +
+					"and to_date(to_char(rt.rtnDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(?, 'YYYY-MM-DD') " +
+					"group by v.city, v.location");
+			ps1.setString(1, city);
+			ps1.setString(2, location);
+			ps1.setString(3, date);
+			ResultSet rs1 = ps1.executeQuery();
+			ResultSetMetaData rsmd1 = rs1.getMetaData();
+			int columnsNumber1 = rsmd1.getColumnCount();
+			while (rs1.next()) {
+				for (int i = 1; i <= columnsNumber1; i++) {
+					if (i > 1) System.out.print(",  ");
+					String columnValue = rs1.getString(i);
+					System.out.print(rsmd1.getColumnName(i) + ": " + columnValue);
+				}
+				System.out.println("");
+			}
+
+			rs.close();
+			rs1.close();
+			ps.close();
+			ps1.close();
+
+		} catch (SQLException e) {
+			System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+			rollbackConnection();
+		}
+	}
 	
 	public boolean login(String username, String password) {
 		try {
