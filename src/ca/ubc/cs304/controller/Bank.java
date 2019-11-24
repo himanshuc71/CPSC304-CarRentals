@@ -110,6 +110,9 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 		dbHandler.printVehicles(licences);
 	}
 
+	public void printDailyReturns(String date){dbHandler.printDailyReturns(date);}
+
+
 //	/**
 //	 * TermainalTransactionsDelegate Implementation
 //	 *

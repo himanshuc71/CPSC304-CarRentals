@@ -3,7 +3,7 @@ package ca.ubc.cs304.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.SQLOutput;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
-import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
 
 /**
@@ -407,8 +406,6 @@ public class TerminalTransactions {
 
             System.out.print("Please choose one of the above 7 options: ");
 
-            System.out.println();
-
             choice = readInteger(false);
 
             System.out.println(" ");
@@ -428,10 +425,10 @@ public class TerminalTransactions {
                         handleDailyRentalsByBranch();
 					    break;
 				    case 5:
-                        handleDailyRenturns();
+                        handleDailyReturns();
 					    break;
                     case 6:
-                        handleDailyRenturnsByBranch();
+                        handleDailyReturnsByBranch();
                         break;
                     case 7:
                         goBackToMainMenu();
@@ -537,18 +534,24 @@ public class TerminalTransactions {
     }
 
     private void handleDailyRentals() {
-        //TODO
+		// TODO
     }
 
     private void handleDailyRentalsByBranch() {
         //TODO
     }
 
-    private void handleDailyRenturns() {
-        //TODO
+    private void handleDailyReturns() {
+		System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+		String date = readLine().trim();
+		while (!validateDate(date)) {
+			System.out.print("Enter date for returns report (YYYY-MM-DD): ");
+			date = readLine().trim();
+		}
+		delegate.printDailyReturns(date);
     }
 
-    private void handleDailyRenturnsByBranch() {
+    private void handleDailyReturnsByBranch() {
         //TODO
     }
 

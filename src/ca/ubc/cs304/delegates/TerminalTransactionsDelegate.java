@@ -47,4 +47,6 @@ public interface TerminalTransactionsDelegate {
     public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
 	public ArrayList getLicenses(String location, String vtname, Timestamp fromDate, Timestamp toDate);
 	public void terminalTransactionsFinished();
+	public void printDailyReturns(String date);
+
 }
