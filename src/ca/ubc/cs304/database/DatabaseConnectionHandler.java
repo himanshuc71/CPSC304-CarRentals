@@ -490,7 +490,8 @@ public class DatabaseConnectionHandler {
             rs.next();
             String vlicense = rs.getString(1);
             rs.close();
-            statement.executeQuery("UPDATE VEHICLE SET STATUS = 'available' where VLICENSE = " + "'" + vlicense + "'");
+            statement.executeQuery("UPDATE VEHICLE SET STATUS = 'available', ODOMETER = ODOMETER + " + returnModel.getOdometer() +
+                    " where VLICENSE = " + "'" + vlicense + "'");
             connection.commit();
             statement.close();
             System.out.println("Vehicle returned with rental id: " + returnModel.getRid() +
@@ -563,6 +564,74 @@ public class DatabaseConnectionHandler {
             rollbackConnection();
         }
 	    return false;
+    }
+
+    public void generateDailyRentals(String date){
+	    try {
+	        Statement statement = connection.createStatement();
+	        String query = "select v.city as Branch_City," +
+                    "v.LOCATION as Branch_Location," +
+                    "count(vB.vlicense) as Total_Branch_Count," +
+                    "v.VTNAME as Vehicle_Type," +
+                    "count(r.rid) as Vehicle_Type_Count " +
+                    "from Vehicle v " +
+                    "inner join Rental r on r.vlicense = v.vlicense " +
+                    "inner join (select v2.vlicense, " +
+                    "v2.city, " +
+                    "v2.location " +
+                    "from Vehicle v2) vB " +
+                    "on vB.vlicense = v.vlicense " +
+                    "and vB.city = v.city " +
+                    "and vB.location = v.location " +
+                    "where to_date(to_char(r.fromDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = " +
+                    "to_date('" + date + "', 'YYYY-MM-DD') " +
+                    "group by v.city, v.location, v.vtname, v.vlicense";
+	        ResultSet rs = statement.executeQuery(query);
+
+            // get info on ResultSet
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+            System.out.println(" ");
+
+            // display column names;
+    		for (int i = 0; i < columnsNumber; i++) {
+    			// get column name and print it
+                if (i < columnsNumber - 1)
+                    System.out.print(rsmd.getColumnName(i + 1) + "  |  ");
+                else
+                    System.out.print(rsmd.getColumnName(i + 1) + "\n");
+    		}
+
+            while (rs.next()) {
+                //Print one row
+                for(int i = 1 ; i <= columnsNumber; i++){
+                    if (i < columnsNumber)
+                        System.out.print(rs.getString(i) + "\t\t\t\t"); //Print one element of a row
+                    else
+                        System.out.print(rs.getString(i) + " "); //Print one element of a row
+                }
+                System.out.println();//Move to the next line to print the next row.
+            }
+            System.out.println(" ");
+            rs.close();
+            query = "select count(r.rid) as Total_Count " +
+                    "from Vehicle v " +
+                    "inner join Rental r on r.vlicense = v.vlicense " +
+                    "where to_date(to_char(r.fromDateTime, 'YYYY-MM-DD'), 'YYYY-MM-DD') = " +
+                    "to_date('" + date + "', 'YYYY-MM-DD')";
+            rs = statement.executeQuery(query);
+            rs.next();
+
+            System.out.println("TOTAL RENTALS BY THE COMPANY ON " + date + " : " + rs.getInt(1));
+
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    public void generateDailyRentalsByBranch(String date, String location, String city){
+
     }
 	
 	public boolean login(String username, String password) {

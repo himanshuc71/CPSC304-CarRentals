@@ -15,11 +15,6 @@ import java.sql.Timestamp;
  * Bank is the actual class that will implement the methods.
  */
 public interface TerminalTransactionsDelegate {
-//	public void deleteBranch(int branchId);
-//	public void insertBranch(BranchModel model);
-//	public void showBranch();
-//	public void updateBranch(int branchId, String name);
-
 	// rental car methods..
 	public void insertCustomer(CustomerModel customer);
 
@@ -33,16 +28,23 @@ public interface TerminalTransactionsDelegate {
 
 	public int numberVehiclesAvailable(String location, String vtname, Timestamp fromDate, Timestamp toDate);
 
-	public CustomerModel getCustomer(int licence);
+	public CustomerModel getCustomer(long licence);
 
 	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate);
 
 	public boolean isValidReservation(String location, String vtname, Timestamp startDateTimestamp, Timestamp endDate);
 
 	public void insertRental(int confNo, String cardName, int cardNo, String expDate);
+
 	public boolean checkRentalExists(int rid);
+
 	public void insertReturn(int rid, Timestamp rtnDateTime, int odometer, int fullTank);
-    public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
+
+	public float calcValue (int rid, Timestamp rtnDateTime, int current_odometer);
+
+    public void generateDailyRentals(String date);
+
+    public void generateDailyRentalsByBranch(String date, String location, String city);
 	
 	public void terminalTransactionsFinished();
 }

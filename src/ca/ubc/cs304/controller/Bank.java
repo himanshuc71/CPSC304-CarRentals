@@ -3,13 +3,10 @@ package ca.ubc.cs304.controller;
 import ca.ubc.cs304.database.DatabaseConnectionHandler;
 import ca.ubc.cs304.delegates.LoginWindowDelegate;
 import ca.ubc.cs304.delegates.TerminalTransactionsDelegate;
-import ca.ubc.cs304.model.BranchModel;
 import ca.ubc.cs304.model.CustomerModel;
 import ca.ubc.cs304.model.ReturnModel;
 import ca.ubc.cs304.ui.LoginWindow;
 import ca.ubc.cs304.ui.TerminalTransactions;
-import oracle.sql.TIMESTAMP;
-
 import java.sql.Timestamp;
 
 /**
@@ -71,7 +68,7 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 		return dbHandler.numberVehiclesAvailable(location, vtname, fromDate, toDate);
 	}
 
-	public CustomerModel getCustomer(int licence) { return dbHandler.getCustomer(licence); }
+	public CustomerModel getCustomer(long licence) { return dbHandler.getCustomer(licence); }
 
 	public void makeReservation(long dLicence, String vtname, Timestamp fromDate, Timestamp toDate) {
 		dbHandler.makeReservation(dLicence, vtname, fromDate, toDate);
@@ -85,10 +82,6 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
 	    dbHandler.insertRental(confNo, cardName, cardNo, expDate);
     }
 
-	public void insertRental (String cardName, int cardNo, String expDate) {
-		dbHandler.insertRental(cardName, cardNo, expDate);
-	}
-
 	public boolean checkRentalExists (int rid) {
 	    return dbHandler.checkRentalExists(rid);
     }
@@ -100,64 +93,14 @@ public class Bank implements LoginWindowDelegate, TerminalTransactionsDelegate {
     public float calcValue(int rid, Timestamp rtnDateTime, int current_odometer) {
 	    return dbHandler.calcValue(rid, rtnDateTime, current_odometer);
     }
-	
-//	/**
-//	 * TermainalTransactionsDelegate Implementation
-//	 *
-//	 * Insert a branch with the given info
-//	 */
-//    public void insertBranch(BranchModel model) {
-//    	dbHandler.insertBranch(model);
-//    }
-//
-//    /**
-//	 * TermainalTransactionsDelegate Implementation
-//	 *
-//	 * Delete branch with given branch ID.
-//	 */
-//    public void deleteBranch(int branchId) {
-//    	dbHandler.deleteBranch(branchId);
-//    }
-//
-//    /**
-//	 * TermainalTransactionsDelegate Implementation
-//	 *
-//	 * Update the branch name for a specific ID
-//	 */
-//
-//    public void updateBranch(int branchId, String name) {
-//    	dbHandler.updateBranch(branchId, name);
-//    }
-//
-//    /**
-//	 * TermainalTransactionsDelegate Implementation
-//	 *
-//	 * Displays information about varies bank branches.
-//	 */
-//    public void showBranch() {
-//    	BranchModel[] models = dbHandler.getBranchInfo();
-//
-//    	for (int i = 0; i < models.length; i++) {
-//    		BranchModel model = models[i];
-//
-//    		// simplified output formatting; truncation may occur
-//    		System.out.printf("%-10.10s", model.getId());
-//    		System.out.printf("%-20.20s", model.getName());
-//    		if (model.getAddress() == null) {
-//    			System.out.printf("%-20.20s", " ");
-//    		} else {
-//    			System.out.printf("%-20.20s", model.getAddress());
-//    		}
-//    		System.out.printf("%-15.15s", model.getCity());
-//    		if (model.getPhoneNumber() == 0) {
-//    			System.out.printf("%-15.15s", " ");
-//    		} else {
-//    			System.out.printf("%-15.15s", model.getPhoneNumber());
-//    		}
-//
-//    		System.out.println();
-//    	}
-//    }
+
+    public void generateDailyRentals(String date){
+	    dbHandler.generateDailyRentals(date);
+    }
+
+    public void generateDailyRentalsByBranch(String date, String location, String city){
+        dbHandler.generateDailyRentalsByBranch(date, location, city);
+    }
 	
     /**
 	 * TerminalTransactionsDelegate Implementation
