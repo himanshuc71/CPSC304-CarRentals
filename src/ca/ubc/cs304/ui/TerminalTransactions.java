@@ -173,6 +173,11 @@ public class TerminalTransactions {
 				break;
 		}
 
+		while (toDate != null && toDate.before(fromDate)){
+			System.out.print("Invalid date format. End date must be after start date. Please re-enter ");
+			toDate = getDate("To");
+		}
+
 		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
 		System.out.println("\n There are " + available + " cars available that fit your input.\n");
 		System.out.print("To see the details of the vehicles available press 1, or any key to skip: ");
@@ -230,6 +235,13 @@ public class TerminalTransactions {
 
 		Timestamp startDateTimestamp = getTimeStampWithTime(startDate, startTime);
 		Timestamp endDateTimestamp = getTimeStampWithTime(endDate, endTime);
+
+		while (endDateTimestamp != null && endDateTimestamp.before(startDateTimestamp)){
+			System.out.print("Invalid date format. End date must be after start date. Please re-enter rental start date (YYYY-MM-DD): ");
+			endDate = readLine().trim();
+			endTime = getTime();
+			endDateTimestamp = getTimeStampWithTime(endDate, endTime);
+		}
 
 		String vtname = getType();
 		if (startDateTimestamp == null || endDateTimestamp == null) {
