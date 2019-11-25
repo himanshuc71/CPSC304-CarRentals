@@ -959,7 +959,7 @@ public class DatabaseConnectionHandler {
 				connection.close();
 			}
 	
-			connection = DriverManager.getConnection(ORACLE_URL, "ora_chotwani", "a39315163");
+			connection = DriverManager.getConnection(ORACLE_URL, username, password);
 			connection.setAutoCommit(false);
 	
 			System.out.println("\nConnected to Oracle!");
