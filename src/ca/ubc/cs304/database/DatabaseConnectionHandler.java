@@ -542,7 +542,7 @@ public class DatabaseConnectionHandler {
 						rental.getToDateTime() +
 						"\n\nThank you!.");
 			} else {
-				System.out.println(WARNING_TAG + "No reservation was found for the confirmation number: "
+				System.out.println(WARNING_TAG + " No reservation was found for the confirmation number: "
 						+ confNo + " please try again.");
 			}
         } catch (SQLException e) {
