@@ -250,7 +250,8 @@ public class TerminalTransactions {
 	}
 
 	private String[] getBranch() {
-		String location, city;
+		String[] branch;
+		String location = null, city = null;
 		System.out.println();
 		System.out.print("Location: ");
 		location = readLine().trim();
@@ -261,19 +262,24 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getBranch();
+					branch = getBranch();
+					location = branch[0];
+					city = branch[1];
 					break;
 				case 2:
-					location = null;
-					city = null;
+					branch = new String[]{null, null};
 					break;
 				default:
 					System.out.println(WARNING_TAG + " The input that you entered was not a valid option. Please re-enter: ");
-					location = null;
-					city = null;
+					branch = new String[]{null, null};
 			}
 		}
-		return new String[] {location, city};
+		if (location != null && city != null) {
+			branch = new String[]{location, city};
+			return branch;
+		} else {
+			return new String[]{null, null};
+		}
 	}
 
 	private String getType() {
@@ -286,7 +292,7 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getType();
+					vtname = getType();
 					break;
 				case 2:
 					vtname = null;
@@ -301,6 +307,7 @@ public class TerminalTransactions {
 	}
 
 	private Timestamp getDate(String dateType) {
+		Timestamp dateTS = null;
 		System.out.print(dateType + " date (YYYY-MM-DD): ");
 		String date = readLine().trim();
 		if (!validateDate(date)) {
@@ -308,7 +315,7 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getDate(dateType);
+					dateTS = getDate(dateType);
 					break;
 				case 2:
 					date = null;
@@ -319,9 +326,12 @@ public class TerminalTransactions {
 					break;
 			}
 		}
-		System.out.print("At time (HH:MM): ");
-		String time = getTime();
-		return getTimeStampWithTime(date, time);
+		if (dateTS == null) {
+			String time = getTime();
+			return getTimeStampWithTime(date, time);
+		} else {
+			return dateTS;
+		}
 	}
 
 	private String getTime() {
@@ -332,7 +342,7 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getTime();
+					time = getTime();
 					break;
 				case 2:
 					time = null;
@@ -350,10 +360,13 @@ public class TerminalTransactions {
 
 	private boolean validateDate(String dateString) {
 		try {
+			String limit = "2000-01-01 00:00:00:00";
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 			Date date = format.parse(dateString + " 00:00:00");
+			Date limitDate = format.parse(limit);
 			Timestamp ts = new Timestamp(date.getTime());
-			return true;
+			Timestamp limitTimestamp = new Timestamp(limitDate.getTime());
+			return !ts.before(limitTimestamp);
 		} catch (Exception e) {
 			return false;
 		}
