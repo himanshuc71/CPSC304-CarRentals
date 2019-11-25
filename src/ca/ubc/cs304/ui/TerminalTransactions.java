@@ -23,7 +23,7 @@ public class TerminalTransactions {
 	private static final String WARNING_TAG = "[WARNING]";
 	private static final int INVALID_INPUT = Integer.MIN_VALUE;
 	private static final int EMPTY_INPUT = 0;
-	
+
 	private BufferedReader bufferedReader = null;
 	private TerminalTransactionsDelegate delegate = null;
 
@@ -173,6 +173,11 @@ public class TerminalTransactions {
 				break;
 		}
 
+		while (toDate != null && toDate.before(fromDate)){
+			System.out.print("Invalid date format. End date must be after start date. Please re-enter ");
+			toDate = getDate("To");
+		}
+
 		int available = delegate.numberVehiclesAvailable(branch[0], vtname, fromDate, toDate);
 		System.out.println("\n There are " + available + " cars available that fit your input.\n");
 		System.out.print("To see the details of the vehicles available press 1, or any key to skip: ");
@@ -231,6 +236,13 @@ public class TerminalTransactions {
 		Timestamp startDateTimestamp = getTimeStampWithTime(startDate, startTime);
 		Timestamp endDateTimestamp = getTimeStampWithTime(endDate, endTime);
 
+		while (endDateTimestamp != null && endDateTimestamp.before(startDateTimestamp)){
+			System.out.print("Invalid date format. End date must be after start date. Please re-enter rental start date (YYYY-MM-DD): ");
+			endDate = readLine().trim();
+			endTime = getTime();
+			endDateTimestamp = getTimeStampWithTime(endDate, endTime);
+		}
+
 		String vtname = getType();
 		if (startDateTimestamp == null || endDateTimestamp == null) {
 			System.out.println("Unable to make a reservation.");
@@ -242,7 +254,7 @@ public class TerminalTransactions {
 				if (whoCalled.equals("Customer"))
 					handleCustomer();
 			} else {
-				System.out.println("Unable to make a reservation with the dates and/or Vehicle Type entered.");
+				System.out.println("No vehicles available for the dates and/or Vehicle Type entered.");
 				if (whoCalled.equals("Customer"))
 					handleCustomer();
 			}
@@ -250,7 +262,8 @@ public class TerminalTransactions {
 	}
 
 	private String[] getBranch() {
-		String location, city;
+		String[] branch;
+		String location = null, city = null;
 		System.out.println();
 		System.out.print("Location: ");
 		location = readLine().trim();
@@ -261,19 +274,24 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getBranch();
+					branch = getBranch();
+					location = branch[0];
+					city = branch[1];
 					break;
 				case 2:
-					location = null;
-					city = null;
+					branch = new String[]{null, null};
 					break;
 				default:
 					System.out.println(WARNING_TAG + " The input that you entered was not a valid option. Please re-enter: ");
-					location = null;
-					city = null;
+					branch = new String[]{null, null};
 			}
 		}
-		return new String[] {location, city};
+		if (location != null && city != null) {
+			branch = new String[]{location, city};
+			return branch;
+		} else {
+			return new String[]{null, null};
+		}
 	}
 
 	private String getType() {
@@ -286,7 +304,7 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getType();
+					vtname = getType();
 					break;
 				case 2:
 					vtname = null;
@@ -301,6 +319,7 @@ public class TerminalTransactions {
 	}
 
 	private Timestamp getDate(String dateType) {
+		Timestamp dateTS = null;
 		System.out.print(dateType + " date (YYYY-MM-DD): ");
 		String date = readLine().trim();
 		if (!validateDate(date)) {
@@ -308,7 +327,7 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getDate(dateType);
+					dateTS = getDate(dateType);
 					break;
 				case 2:
 					date = null;
@@ -319,9 +338,12 @@ public class TerminalTransactions {
 					break;
 			}
 		}
-		System.out.print("At time (HH:MM): ");
-		String time = getTime();
-		return getTimeStampWithTime(date, time);
+		if (dateTS == null) {
+			String time = getTime();
+			return getTimeStampWithTime(date, time);
+		} else {
+			return dateTS;
+		}
 	}
 
 	private String getTime() {
@@ -332,7 +354,7 @@ public class TerminalTransactions {
 			int choice = readInteger(true);
 			switch (choice) {
 				case 1:
-					getTime();
+					time = getTime();
 					break;
 				case 2:
 					time = null;
@@ -350,10 +372,13 @@ public class TerminalTransactions {
 
 	private boolean validateDate(String dateString) {
 		try {
+			String limit = "2000-01-01 00:00:00:00";
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 			Date date = format.parse(dateString + " 00:00:00");
+			Date limitDate = format.parse(limit);
 			Timestamp ts = new Timestamp(date.getTime());
-			return true;
+			Timestamp limitTimestamp = new Timestamp(limitDate.getTime());
+			return !ts.before(limitTimestamp);
 		} catch (Exception e) {
 			return false;
 		}
@@ -398,82 +423,82 @@ public class TerminalTransactions {
 
 	private void handleClerk() {
 		// functionalities for Clerk
-        int choice = INVALID_INPUT;
-        while (choice != 7) {
-            System.out.println();
-            System.out.println("1. Rent a vehicle for a Customer ");
-            System.out.println("2. Return a vehicle for a Customer ");
-            System.out.println("3. Generate daily rentals ");
-            System.out.println("4. Generate daily rentals by branch ");
-            System.out.println("5. Generate daily returns ");
-            System.out.println("6. Generate daily returns by branch ");
-            System.out.println("7. Go back to the main menu");
+		int choice = INVALID_INPUT;
+		while (choice != 7) {
+			System.out.println();
+			System.out.println("1. Rent a vehicle for a Customer ");
+			System.out.println("2. Return a vehicle for a Customer ");
+			System.out.println("3. Generate daily rentals ");
+			System.out.println("4. Generate daily rentals by branch ");
+			System.out.println("5. Generate daily returns ");
+			System.out.println("6. Generate daily returns by branch ");
+			System.out.println("7. Go back to the main menu");
 
-            System.out.print("Please choose one of the above 7 options: ");
+			System.out.print("Please choose one of the above 7 options: ");
 
-            System.out.println();
+			System.out.println();
 
-            choice = readInteger(false);
+			choice = readInteger(false);
 
-            System.out.println(" ");
+			System.out.println(" ");
 
-            if (choice != INVALID_INPUT) {
-                switch (choice) {
-                    case 1:
-                        handleRental();
-                        break;
-                    case 2:
-                        handleReturn();
-                        break;
-                    case 3:
-                        handleDailyRentals();
-                        break;
-				    case 4:
-                        handleDailyRentalsByBranch();
-					    break;
-				    case 5:
-                        handleDailyReturns();
-					    break;
-                    case 6:
-                        handleDailyReturnsByBranch();
-                        break;
-                    case 7:
-                        goBackToMainMenu();
-                        break;
-                    default:
-                        System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
-                        break;
-                }
-            }
-        }
+			if (choice != INVALID_INPUT) {
+				switch (choice) {
+					case 1:
+						handleRental();
+						break;
+					case 2:
+						handleReturn();
+						break;
+					case 3:
+						handleDailyRentals();
+						break;
+					case 4:
+						handleDailyRentalsByBranch();
+						break;
+					case 5:
+						handleDailyReturns();
+						break;
+					case 6:
+						handleDailyReturnsByBranch();
+						break;
+					case 7:
+						goBackToMainMenu();
+						break;
+					default:
+						System.out.println(WARNING_TAG + " The number that you entered was not a valid option.");
+						break;
+				}
+			}
+		}
 	}
 
-    private void handleRental() {
-	    String reserve = null;
-	    while (true) {
-            System.out.println("Is there a reservation? Enter y/n: ");
-            reserve = readLine().trim();
-            if (reserve.toLowerCase().equals("y")) {
-                handleRentalWReservation();
-                break;
-            } else if (reserve.toLowerCase().equals("n")) {
-                handleRentalWOReservation();
-                break;
-            } else {
-                System.out.println("Invalid option try again; Enter y/n");
-            }
-        }
+	private void handleRental() {
+		String reserve = null;
+		while (true) {
+			System.out.println("Is there a reservation? Enter y/n: ");
+			reserve = readLine().trim();
+			if (reserve.toLowerCase().equals("y")) {
+				handleRentalWReservation();
+				break;
+			} else if (reserve.toLowerCase().equals("n")) {
+				handleRentalWOReservation();
+				break;
+			} else {
+				System.out.println("Invalid option try again; Enter y/n");
+			}
+		}
 	}
 
 	private void handleRentalWReservation(){
-	    int confNo = INVALID_INPUT;
-	    while (confNo == INVALID_INPUT) {
-            System.out.println();
-            System.out.println("Enter the confirmation number for the Reservation: ");
-            confNo = readInteger(false);
-            if (confNo != INVALID_INPUT) {
-            	String cardName = null;
-            	while (cardName == null) {
+		int confNo = INVALID_INPUT;
+		while (confNo == INVALID_INPUT) {
+			System.out.println();
+			System.out.println("Enter the confirmation number for the Reservation: ");
+			confNo = readInteger(false);
+			if (confNo != INVALID_INPUT) {
+				String cardName = null;
+				while (cardName == null) {
 					System.out.println("Enter the Credit Card Name: ");
 					cardName = readLine().trim();
 					if (cardName != null) {
@@ -494,56 +519,56 @@ public class TerminalTransactions {
 						}
 					}
 				}
-            }
-        }
-    }
+			}
+		}
+	}
 
-    private void handleRentalWOReservation() {
+	private void handleRentalWOReservation() {
 		makeReservation("Clerk");
 		handleRentalWReservation();
-    }
+	}
 
-    private void handleReturn(){
-        int rid = INVALID_INPUT;
-        while (rid == INVALID_INPUT) {
-            System.out.println("Please enter the rental id: ");
-            rid = readInteger(false);
-            if (delegate.checkRentalExists(rid)) {
-                int tankFull = INVALID_INPUT;
-                while (true) {
-                    System.out.println("Enter 1 if the tank was full, 0 otherwise: ");
-                    tankFull = readInteger(false);
-                    if (tankFull == 1 || tankFull == 0) {
-                        break;
-                    }
-                    System.out.println(WARNING_TAG + "You are allowed to enter 1 or 0 only");
-                }
-                int odometer = INVALID_INPUT;
-                while (odometer == INVALID_INPUT) {
-                    System.out.println("Enter odometer value: ");
-                    odometer = readInteger(false);
-                }
-                String rtnDateTime = null;
-                while (true) {
-                    System.out.println("Enter return date in format yyyy-mm-dd: ");
-                    rtnDateTime = readLine().trim();
-                    if (validateDate(rtnDateTime))
-                        break;
-                    System.out.println("Please enter a valid date format.");
-                }
-                rtnDateTime = rtnDateTime + " " + "00:00:00";
-                Timestamp rtnDateTime_timestamp = Timestamp.valueOf(rtnDateTime);
+	private void handleReturn(){
+		int rid = INVALID_INPUT;
+		while (rid == INVALID_INPUT) {
+			System.out.println("Please enter the rental id: ");
+			rid = readInteger(false);
+			if (delegate.checkRentalExists(rid)) {
+				int tankFull = INVALID_INPUT;
+				while (true) {
+					System.out.println("Enter 1 if the tank was full, 0 otherwise: ");
+					tankFull = readInteger(false);
+					if (tankFull == 1 || tankFull == 0) {
+						break;
+					}
+					System.out.println(WARNING_TAG + "You are allowed to enter 1 or 0 only");
+				}
+				int odometer = INVALID_INPUT;
+				while (odometer == INVALID_INPUT) {
+					System.out.println("Enter odometer value: ");
+					odometer = readInteger(false);
+				}
+				String rtnDateTime = null;
+				while (true) {
+					System.out.println("Enter return date in format yyyy-mm-dd: ");
+					rtnDateTime = readLine().trim();
+					if (validateDate(rtnDateTime))
+						break;
+					System.out.println("Please enter a valid date format.");
+				}
+				rtnDateTime = rtnDateTime + " " + "00:00:00";
+				Timestamp rtnDateTime_timestamp = Timestamp.valueOf(rtnDateTime);
 
-                delegate.insertReturn(rid, rtnDateTime_timestamp, odometer, tankFull);
-            } else {
-                System.out.println(WARNING_TAG + " No currently rented vehicle with rental id: " + rid + " found");
-            }
-        }
+				delegate.insertReturn(rid, rtnDateTime_timestamp, odometer, tankFull);
+			} else {
+				System.out.println(WARNING_TAG + " No currently rented vehicle with rental id: " + rid + " found");
+			}
+		}
 
 
-    }
+	}
 
-    private void handleDailyRentals() {
+	private void handleDailyRentals() {
 		String dateForDailyRentals;
 		while (true) {
 			System.out.println("Enter date for daily rentals 'YYYY-MM-DD': ");
@@ -554,9 +579,9 @@ public class TerminalTransactions {
 			System.out.println("Invalid date format please try again 'YYYY-MM-DD' ");
 		}
 		delegate.generateDailyRentals(dateForDailyRentals);
-    }
+	}
 
-    private void handleDailyRentalsByBranch() {
+	private void handleDailyRentalsByBranch() {
 		String dateForDailyRentals;
 		while (true) {
 			System.out.println("Enter date for daily rentals 'YYYY-MM-DD': ");
@@ -580,7 +605,7 @@ public class TerminalTransactions {
 		}
 
 		delegate.generateDailyRentalsByBranch(dateForDailyRentals, location, city);
-    }
+	}
 
 	private void handleDailyReturns() {
 		System.out.print("Enter date for returns report (YYYY-MM-DD): ");
@@ -603,13 +628,13 @@ public class TerminalTransactions {
 		delegate.printDailyReturnsByBranch(branch[1], branch[0], date);
 	}
 
-    private void goBackToMainMenu() {
-        showMainMenu(delegate);
-    }
-	
+	private void goBackToMainMenu() {
+		showMainMenu(delegate);
+	}
+
 	private void handleQuitOption() {
 		System.out.println("Good Bye!");
-		
+
 		if (bufferedReader != null) {
 			try {
 				bufferedReader.close();
@@ -617,10 +642,10 @@ public class TerminalTransactions {
 				System.out.println("IOException!");
 			}
 		}
-		
+
 		delegate.terminalTransactionsFinished();
 	}
-	
+
 	private int readInteger(boolean allowEmpty) {
 		String line = null;
 		int input = INVALID_INPUT;
@@ -656,7 +681,7 @@ public class TerminalTransactions {
 		}
 		return input;
 	}
-	
+
 	private String readLine() {
 		String result = null;
 		try {
