@@ -242,7 +242,7 @@ public class TerminalTransactions {
 				if (whoCalled.equals("Customer"))
 					handleCustomer();
 			} else {
-				System.out.println("Unable to make a reservation with the dates and/or Vehicle Type entered.");
+				System.out.println("No vehicles available for the dates and/or Vehicle Type entered.");
 				if (whoCalled.equals("Customer"))
 					handleCustomer();
 			}
